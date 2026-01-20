@@ -101,6 +101,19 @@
             "cStandard": "c17",
             "cppStandard": "gnu++17",
             "intelliSenseMode": "linux-gcc-x64"
+        },
+        {
+            "name": "imx6ull_12_HighPrecision_delay",
+            "includePath": [
+                "${workspaceFolder}/myproject/12_HighPrecision_delay/**",
+                "${workspaceFolder}/myproject/12_HighPrecision_delay/imx6ul"   
+                
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c17",
+            "cppStandard": "gnu++17",
+            "intelliSenseMode": "linux-gcc-x64"
         }
     ],
     "version": 4
