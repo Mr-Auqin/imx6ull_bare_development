@@ -1,0 +1,107 @@
+{
+    "configurations": [
+        {
+            "name": "imx6ull_02_lec",
+            "includePath": [
+                "${workspaceFolder}/myproject/02_ledc/**"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c17",
+            "cppStandard": "gnu++17",
+            "intelliSenseMode": "linux-gcc-x64"
+        },
+        {
+            "name": "imx6ull_05_ledc_bsp",
+            "includePath": [
+                "${workspaceFolder}/myproject/05_ledc_bsp/**",
+                "${workspaceFolder}/myproject/05_ledc_bsp/imx6ul"
+                
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c17",
+            "cppStandard": "gnu++17",
+            "intelliSenseMode": "linux-gcc-x64"
+        },
+        {
+            "name": "imx6ull_06_beep",
+            "includePath": [
+                "${workspaceFolder}/myproject/06_beep/**",
+                "${workspaceFolder}/myproject/06_beep/imx6ul"
+                
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c17",
+            "cppStandard": "gnu++17",
+            "intelliSenseMode": "linux-gcc-x64"
+        },
+        {
+            "name": "imx6ull_07_key",
+            "includePath": [
+                "${workspaceFolder}/myproject/07_key/**",
+                "${workspaceFolder}/myproject/07_key/imx6ul"
+                
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c17",
+            "cppStandard": "gnu++17",
+            "intelliSenseMode": "linux-gcc-x64"
+        },
+        {
+            "name": "imx6ull_08_clk",
+            "includePath": [
+                "${workspaceFolder}/myproject/08_clk/**",
+                "${workspaceFolder}/myproject/08_clk/imx6ul"
+                
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c17",
+            "cppStandard": "gnu++17",
+            "intelliSenseMode": "linux-gcc-x64"
+        },
+        {
+            "name": "imx6ull_09_int",
+            "includePath": [
+                "${workspaceFolder}/myproject/09_int/**",
+                "${workspaceFolder}/myproject/09_int/imx6ul"
+                
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c17",
+            "cppStandard": "gnu++17",
+            "intelliSenseMode": "linux-gcc-x64"
+        },
+        {
+            "name": "imx6ull_10_epit",
+            "includePath": [
+                "${workspaceFolder}/myproject/10_epit/**",
+                "${workspaceFolder}/myproject/10_epit/imx6ul"   
+                
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c17",
+            "cppStandard": "gnu++17",
+            "intelliSenseMode": "linux-gcc-x64"
+        },
+        {
+            "name": "imx6ull_11_key_filter",
+            "includePath": [
+                "${workspaceFolder}/myproject/11_key_filter/**",
+                "${workspaceFolder}/myproject/11_key_filter/imx6ul"   
+                
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c17",
+            "cppStandard": "gnu++17",
+            "intelliSenseMode": "linux-gcc-x64"
+        }
+    ],
+    "version": 4
+}
