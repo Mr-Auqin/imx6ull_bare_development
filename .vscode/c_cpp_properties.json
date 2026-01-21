@@ -114,6 +114,19 @@
             "cStandard": "c17",
             "cppStandard": "gnu++17",
             "intelliSenseMode": "linux-gcc-x64"
+        },
+        {
+            "name": "imx6ull_13_uart",
+            "includePath": [
+                "${workspaceFolder}/myproject/13_uart/**",
+                "${workspaceFolder}/myproject/13_uart/imx6ul"   
+                
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c17",
+            "cppStandard": "gnu++17",
+            "intelliSenseMode": "linux-gcc-x64"
         }
     ],
     "version": 4
