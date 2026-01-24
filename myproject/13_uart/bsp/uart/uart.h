@@ -31,14 +31,11 @@ typedef struct
 
 } UART_IT_config_t;
 
-/**
- * @brief UART driver API
- *
- * This module provides the UART driver API.
- */
 
 /**
  * @brief Get a UART instance
+ *
+ * This function returns a UART instance based on the given UART number
  *
  * @param GPTNum The UART number
  * @return The UART instance
@@ -46,41 +43,90 @@ typedef struct
 UART_Type* UART_GetInstance(uint32_t GPTNum);
 
 
-
-
-
-void BSP_UART_Init(UART_Type *UART, UARTconfig_t *UARTconfig);
+/**
+ * @brief Initialize a UART instance
+ *
+ * This function initializes a UART instance based on the given configuration
+ *
+ * @param uart The UART instance to be initialized
+ * @param uartconfig The UART configuration
+ */
+void BSP_UART_Init(UART_Type *uart, UARTconfig_t *uartconfig);
 void BSP_UART_Start(UART_Type *UART);
 void BSP_UART_Stop(UART_Type *UART);
 
-//��ѯ�ķ�ʽ����(����)
-//�ú���������ֱ�����ݷ������
-//������
-//      uart��UARTʵ��
-//      data��Ҫ���͵�����
-//      len��Ҫ���͵����ݵĳ���
+
+/**
+ * @brief Transmits data through a UART instance
+ *
+ * This function transmits the given data through the given UART instance
+ *
+ * @param uart The UART instance to be used for transmission
+ * @param data The data to be transmitted
+ * @param len The length of the data to be transmitted
+ */
 void BSP_UART_Transmit(UART_Type *uart, uint8_t *data, uint32_t len);
-void BSP_UART_Receive(UART_Type *UART, uint8_t *data, uint32_t len);
 
-//�жϵķ�ʽ����(������)
-// �ú��������жϷ�������ʵ�����ݵķ���
-//  ������
-//      uart��UARTʵ��
-//      data��Ҫ���͵�����
-//      len��Ҫ���͵����ݵĳ���
+/**
+ * @brief Receives data through a UART instance
+ *
+ * This function receives the given data through the given UART instance
+ *
+ * @param uart The UART instance to be used for reception
+ * @param data The data to be received
+ * @param len The length of the data to be received
+ */
+void BSP_UART_Receive(UART_Type *uart, uint8_t *data, uint32_t len);
+
+
+
+/**
+ * @brief Transmits data through a UART instance using interrupts
+ *
+ * This function transmits the given data through the given UART instance using interrupts
+ *
+ * @param uart The UART instance to be used for transmission
+ * @param data The data to be transmitted
+ * @param len The length of the data to be transmitted
+ */
 void BSP_UART_Transmit_IT(UART_Type *uart, uint8_t *data, uint32_t len);
-void BSP_UART_Receive_IT(UART_Type *UART, uint8_t *data, uint32_t len);
 
-//ʹ��DMA�ķ�ʽ�������ݣ�UARTʹ��DMAʵ�����ݵķ���
-//������
-//      uart��UARTʵ��
-//      data��Ҫ���͵�����
-//      len��Ҫ���͵����ݵĳ���
-//�ú�������DMA�жϷ�������ʵ�����ݵķ��ͣ��������������̡߳�
-//�ڵ����������ʱ��UART��֪ͨDMAʵ�����ݵķ��ͣ�ֱ�����ݷ������,ͨ���ж�֪ͨӦ�ó���,���ڷ������
-//�����ڼ䣬�ú������������������̣߳����Լ���ִ����������
+/**
+ * @brief Receives data through a UART instance using interrupts
+ *
+ * This function receives the given data through the given UART instance using interrupts
+ *
+ * @param uart The UART instance to be used for reception
+ * @param data The data to be received
+ * @param len The length of the data to be received
+ */
+void BSP_UART_Receive_IT(UART_Type *uart, uint8_t *data, uint32_t len);
+
+
+/**
+ * @brief Transmits data through a UART instance using DMA
+ *
+ * This function transmits the given data through the given UART instance using DMA
+ *
+ * @param uart The UART instance to be used for transmission
+ * @param data The data to be transmitted
+ * @param len The length of the data to be transmitted
+ */
 void BSP_UART_Transmit_DMA(UART_Type *uart, uint8_t *data, uint32_t len);
-void BSP_UART_Receive_DMA(UART_Type *UART, uint8_t *data, uint32_t len);
+
+/**
+ * @brief Receives data through a UART instance using DMA
+ *
+ * This function receives the given data through the given UART instance using DMA
+ *
+ * @param uart The UART instance to be used for reception
+ * @param data The data to be received
+ * @param len The length of the data to be received
+ */
+void BSP_UART_Receive_DMA(UART_Type *uart, uint8_t *data, uint32_t len);
+
+
+
 
 
 
