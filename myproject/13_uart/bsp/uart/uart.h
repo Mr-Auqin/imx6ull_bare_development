@@ -3,16 +3,33 @@
 
 #include "imx6ul.h"
 
+typedef struct
+{
+    uint32_t UART_UCR1_Status; // the UART Status:0-Disable the UART,1-Enable the UART
+    uint32_t UART_UCR2_IRTS;   // Ignore RTS Pin: 1-Ignore the RTS pin
+    uint32_t UART_UCR2_PREN;   // Parity Enable: 0 Disable parity generator and checker
+    uint32_t UART_UCR2_PROE;   // Parity Odd Even: 0 Even parity  , 1 Odd parity
+    uint32_t UART_UCR2_STPB;   // Stop Bit Length: 0-1bit, 1-2bits
+    uint32_t UART_UCR2_WS;     // Word Size: 0-7bits, 1-8bits
+    uint32_t UART_UCR2_TXEN;   // Transmitter Enable: 0-Disable the transmitter, 1-Enable the transmitter
+    uint32_t UART_UCR2_RXEN;   // Receiver Enable: 0-Disable the receiver, 1-Enable the receiver
+    uint32_t UART_UCR2_SRST;   // Software Reset: 1-Do not reset the UART, 0-Reset the UART
 
+} UARTconfig_t;
 
 typedef struct
 {
 
-    
+    uint32_t UART_UCR1_TRDYEN;  //the transmitter ready interrupt
+    uint32_t UART_UCR1_TXMPTYEN; //the transmitter FIFO empty interrupt
+    uint32_t UART_UCR1_RRDYEN;  //the receiver ready interrupt
+    uint32_t UART_UCR1_IDEN;    //the IDLE interrupt
+    uint32_t UART_UCR1_ICD;    //the Idle Condition Detect
 
 
 
-} UARTconfig_t;
+
+} UART_IT_config_t;
 
 /**
  * @brief UART driver API
@@ -36,32 +53,32 @@ void BSP_UART_Init(UART_Type *UART, UARTconfig_t *UARTconfig);
 void BSP_UART_Start(UART_Type *UART);
 void BSP_UART_Stop(UART_Type *UART);
 
-//²éÑ¯µÄ·½Ê½·¢ËÍ(×èÈû)
-//¸Ãº¯Êý½«×èÈûÖ±µ½Êý¾Ý·¢ËÍÍê³É
-//²ÎÊý£º
-//      uart£ºUARTÊµÀý
-//      data£ºÒª·¢ËÍµÄÊý¾Ý
-//      len£ºÒª·¢ËÍµÄÊý¾ÝµÄ³¤¶È
+//ï¿½ï¿½Ñ¯ï¿½Ä·ï¿½Ê½ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½)
+//ï¿½Ãºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö±ï¿½ï¿½ï¿½ï¿½ï¿½Ý·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+//      uartï¿½ï¿½UARTÊµï¿½ï¿½
+//      dataï¿½ï¿½Òªï¿½ï¿½ï¿½Íµï¿½ï¿½ï¿½ï¿½ï¿½
+//      lenï¿½ï¿½Òªï¿½ï¿½ï¿½Íµï¿½ï¿½ï¿½ï¿½ÝµÄ³ï¿½ï¿½ï¿½
 void BSP_UART_Transmit(UART_Type *uart, uint8_t *data, uint32_t len);
 void BSP_UART_Receive(UART_Type *UART, uint8_t *data, uint32_t len);
 
-//ÖÐ¶ÏµÄ·½Ê½·¢ËÍ(·Ç×èÈû)
-// ¸Ãº¯Êý½«ÔÚÖÐ¶Ï·þÎñº¯ÊýÖÐÊµÏÖÊý¾ÝµÄ·¢ËÍ
-//  ²ÎÊý£º
-//      uart£ºUARTÊµÀý
-//      data£ºÒª·¢ËÍµÄÊý¾Ý
-//      len£ºÒª·¢ËÍµÄÊý¾ÝµÄ³¤¶È
+//ï¿½Ð¶ÏµÄ·ï¿½Ê½ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)
+// ï¿½Ãºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¶Ï·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½ï¿½ï¿½ï¿½ÝµÄ·ï¿½ï¿½ï¿½
+//  ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+//      uartï¿½ï¿½UARTÊµï¿½ï¿½
+//      dataï¿½ï¿½Òªï¿½ï¿½ï¿½Íµï¿½ï¿½ï¿½ï¿½ï¿½
+//      lenï¿½ï¿½Òªï¿½ï¿½ï¿½Íµï¿½ï¿½ï¿½ï¿½ÝµÄ³ï¿½ï¿½ï¿½
 void BSP_UART_Transmit_IT(UART_Type *uart, uint8_t *data, uint32_t len);
 void BSP_UART_Receive_IT(UART_Type *UART, uint8_t *data, uint32_t len);
 
-//Ê¹ÓÃDMAµÄ·½Ê½·¢ËÍÊý¾Ý£¬UARTÊ¹ÓÃDMAÊµÏÖÊý¾ÝµÄ·¢ËÍ
-//²ÎÊý£º
-//      uart£ºUARTÊµÀý
-//      data£ºÒª·¢ËÍµÄÊý¾Ý
-//      len£ºÒª·¢ËÍµÄÊý¾ÝµÄ³¤¶È
-//¸Ãº¯Êý½«ÔÚDMAÖÐ¶Ï·þÎñº¯ÊýÖÐÊµÏÖÊý¾ÝµÄ·¢ËÍ£¬²»»á×èÈûµ÷ÓÃÏß³Ì¡£
-//ÔÚµ÷ÓÃÕâ¸öº¯ÊýÊ±£¬UART½«Í¨ÖªDMAÊµÏÖÊý¾ÝµÄ·¢ËÍ£¬Ö±µ½Êý¾Ý·¢ËÍÍê³É,Í¨¹ýÖÐ¶ÏÍ¨ÖªÓ¦ÓÃ³ÌÐò,´®¿Ú·¢ËÍÍê³É
-//ÔÚÕâÆÚ¼ä£¬¸Ãº¯Êý½«²»»á×èÈûµ÷ÓÃÏß³Ì£¬¿ÉÒÔ¼ÌÐøÖ´ÐÐÆäËûÈÎÎñ
+//Ê¹ï¿½ï¿½DMAï¿½Ä·ï¿½Ê½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý£ï¿½UARTÊ¹ï¿½ï¿½DMAÊµï¿½ï¿½ï¿½ï¿½ï¿½ÝµÄ·ï¿½ï¿½ï¿½
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+//      uartï¿½ï¿½UARTÊµï¿½ï¿½
+//      dataï¿½ï¿½Òªï¿½ï¿½ï¿½Íµï¿½ï¿½ï¿½ï¿½ï¿½
+//      lenï¿½ï¿½Òªï¿½ï¿½ï¿½Íµï¿½ï¿½ï¿½ï¿½ÝµÄ³ï¿½ï¿½ï¿½
+//ï¿½Ãºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½DMAï¿½Ð¶Ï·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½ï¿½ï¿½ï¿½ÝµÄ·ï¿½ï¿½Í£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß³Ì¡ï¿½
+//ï¿½Úµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½UARTï¿½ï¿½Í¨ÖªDMAÊµï¿½ï¿½ï¿½ï¿½ï¿½ÝµÄ·ï¿½ï¿½Í£ï¿½Ö±ï¿½ï¿½ï¿½ï¿½ï¿½Ý·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,Í¨ï¿½ï¿½ï¿½Ð¶ï¿½Í¨ÖªÓ¦ï¿½Ã³ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½Ú·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+//ï¿½ï¿½ï¿½ï¿½ï¿½Ú¼ä£¬ï¿½Ãºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß³Ì£ï¿½ï¿½ï¿½ï¿½Ô¼ï¿½ï¿½ï¿½Ö´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 void BSP_UART_Transmit_DMA(UART_Type *uart, uint8_t *data, uint32_t len);
 void BSP_UART_Receive_DMA(UART_Type *UART, uint8_t *data, uint32_t len);
 
