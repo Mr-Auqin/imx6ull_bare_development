@@ -1,5 +1,5 @@
 CROSS_COMPILE ?= arm-linux-gnueabihf-
-TARGET ?= HighPrecision_delay
+TARGET ?= uart
 OUT_OBJDIR ?= obj
 
 CC := $(CROSS_COMPILE)gcc
@@ -20,6 +20,7 @@ INCDIRS := imx6ul\
 		   bsp/epit\
 		   bsp/KeyFilter\
 		   bsp/gpt\
+		   bsp/uart
 
 SRCDIRS := project\
 		   bsp/clk\
@@ -33,6 +34,7 @@ SRCDIRS := project\
 		   bsp/epit\
 		   bsp/KeyFilter\
 		   bsp/gpt\
+		   bsp/uart
 
 INCLUDES := $(patsubst %,-I %,$(INCDIRS))
 

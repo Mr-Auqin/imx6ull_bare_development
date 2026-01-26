@@ -4,9 +4,8 @@
 #include "imx6ul.h"
 
 /*UART_Config_Select*/
-#define UART_clksource_ipg_clk 0
-#define UART_clksource_ipg_clk_s 1
-#define UART_clksource_ipg_clk_perclk 2
+#define UART_clksource_from_pll3_80M 0
+#define UART_clksource_from_osc_clk  1
 
 #define UART_clk_divider_6 0
 #define UART_clk_divider_5 1
@@ -29,7 +28,10 @@
 #define UART_STOPBITS_1 0
 #define UART_STOPBITS_2 1
 
+#define UART_Sender_DISABLE 0
 #define UART_Sender_ENABLE 1
+
+#define UART_Receiver_DISABLE 0
 #define UART_Receiver_ENABLE 1
 
 /*UART_IT_Config_Select*/
@@ -52,19 +54,22 @@
 #define UART_FLAG_TXDC UART_USR2_TXDC_MASK // Transmitter Complete Interrupt Flag
 #define UART_FLAG_ORE UART_USR2_ORE_MASK   // Overrun Error Interrupt Flag
 
-
 // 参数说明：
-// REGVALUE: 要修改的原始值
+// REG_ADDR: 要修改内存地址
 // Field_MASK: 要修改的位的掩码
 // Field_VAL: 要设置的目标值
-// 示例:SET_BIT(UART1->UCR1,UART_UCR1_UARTEN_MASK,UART_UCR1_UARTEN(1));
-#define SET_BIT(REGVALUE, Field_MASK, Field_VAL) \
-    (/* 核心逻辑：清0指定位 + 设置新值 */        \
-     (((REGVALUE) & ~(Field_MASK)) | (Field_VAL)))
-
-
-
-
+// 示例:SET_BIT(&UART1->UCR1,UART_UCR1_UARTEN_MASK,UART_UCR1_UARTEN(1));
+// 优化版：直接操作内存地址，完成读-改-写
+#define SET_BIT(REG_ADDR, Field_MASK, Field_VAL)               \
+	do                                                         \
+	{                                                          \
+		/* 1. 读：从内存地址读取当前值 */                      \
+		volatile unsigned int _reg_val = *(REG_ADDR);          \
+		/* 2. 改：计算新值 */                                  \
+		_reg_val = ((_reg_val & ~(Field_MASK)) | (Field_VAL)); \
+		/* 3. 写：写回内存地址（真正修改内存） */              \
+		*(REG_ADDR) = _reg_val;                                \
+	} while (0) // do-while保证宏作为语句调用时语法合法
 
 typedef struct
 {
@@ -98,21 +103,21 @@ typedef struct
 typedef struct
 {
 
-    uint32_t UART_UCR1_Status;    // the UART Status:0-Disable the UART,1-Enable the UART
-    uint32_t UART_UCR2_IRTS;      // Ignore RTS Pin: 1-Ignore the RTS pin
-    uint32_t UART_UCR2_PREN;      // Parity Enable: 0 Disable parity generator and checker
-    uint32_t UART_UCR2_PROE;      // Parity Odd Even: 0 Even parity  , 1 Odd parity
-    uint32_t UART_UCR2_STPB;      // Stop Bit Length: 0-1bit, 1-2bits
-    uint32_t UART_UCR2_WS;        // Word Size: 0-7bits, 1-8bits
-    uint32_t UART_UCR2_TXEN;      // Transmitter Enable: 0-Disable the transmitter, 1-Enable the transmitter
-    uint32_t UART_UCR2_RXEN;      // Receiver Enable: 0-Disable the receiver, 1-Enable the receiver
-    uint32_t UART_UCR2_SRST;      // Software Reset: 1-Do not reset the UART, 0-Reset the UART
-    uint32_t UART_UCR3_RXDMUXSEL; // In this chip, UARTs are used in MUXED mode, so that this bit should always be set.
-    uint32_t UART_UFCR_RFDIV;     // Reference Frequency Divider
-    uint32_t UART_UFCR_DCEDTE;    // DCE/DTE mode select:  0 DCE mode selected  1 DTE mode selected
-    uint32_t UART_UBIR_INC;       // Incremental Counter
-    uint32_t UART_UBMR_MOD;       // Decremental Counter
-    uint32_t UART_ONEMS_ONEMS;    // must contain the value of the UART internal frequency divided by 1000
+    uint32_t __UART_UCR1_UARTEN;    // the UART UARTEN:0-Disable the UART,1-Enable the UART
+    uint32_t __UART_UCR2_IRTS;      // Ignore RTS Pin: 1-Ignore the RTS pin
+    uint32_t __UART_UCR2_PREN;      // Parity Enable: 0 Disable parity generator and checker
+    uint32_t __UART_UCR2_PROE;      // Parity Odd Even: 0 Even parity  , 1 Odd parity
+    uint32_t __UART_UCR2_STPB;      // Stop Bit Length: 0-1bit, 1-2bits
+    uint32_t __UART_UCR2_WS;        // Word Size: 0-7bits, 1-8bits
+    uint32_t __UART_UCR2_TXEN;      // Transmitter Enable: 0-Disable the transmitter, 1-Enable the transmitter
+    uint32_t __UART_UCR2_RXEN;      // Receiver Enable: 0-Disable the receiver, 1-Enable the receiver
+    uint32_t __UART_UCR2_SRST;      // Software Reset: 1-Do not reset the UART, 0-Reset the UART
+    uint32_t __UART_UCR3_RXDMUXSEL; // In this chip, UARTs are used in MUXED mode, so that this bit should always be set.
+    uint32_t __UART_UFCR_RFDIV;     // Reference Frequency Divider
+    uint32_t __UART_UFCR_DCEDTE;    // DCE/DTE mode select:  0 DCE mode selected  1 DTE mode selected
+    uint32_t __UART_UBIR_INC;       // Incremental Counter
+    uint32_t __UART_UBMR_MOD;       // Decremental Counter
+    uint32_t __UART_ONEMS_ONEMS;    // must contain the value of the UART internal frequency divided by 1000
 
 } __UART_Register_field_config_t;
 
@@ -135,10 +140,22 @@ typedef struct
  *
  * This function returns a UART instance based on the given UART number
  *
- * @param GPTNum The UART number
+ * @param UARTNum The UART number
  * @return The UART instance
  */
-UART_Type *UART_GetInstance(uint32_t GPTNum);
+UART_Type *UART_GetInstance(uint32_t UARTNum);
+
+void UART_Init(void);
+
+
+
+
+
+
+
+
+
+
 
 /**
  * @brief Initialize a UART instance
