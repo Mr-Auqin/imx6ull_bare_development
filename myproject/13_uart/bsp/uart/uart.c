@@ -1,9 +1,11 @@
 #include "uart.h"
+#include "bsp_int.h"
 
 
 uint32_t   UART_base_add[] = UART_BASE_ADDRS;
 UART_Type* UART_base_ptrs[] = UART_BASE_PTRS;
 uint32_t   UART_irqs[] = UART_IRQS;
+uart_irq_handle_t uart_irq_handles[UART_Number+1]; //对应 下标从1开始 对应8个串口的中断服务函数
 
 
 UART_Type *UART_GetInstance(uint32_t UARTNum)
@@ -84,15 +86,18 @@ void UART_Init(void)
 
     //itconfig 结构体清零
     memset(&itconfig, 0, sizeof(UART_IT_Config_t));
-    itconfig.txReadyInterruptEnable = 0;             // the transmitter ready interrupt
-    itconfig.txEmptyInterruptEnable = 0;             // the transmitter FIFO empty interrupt
-    itconfig.rxReadyInterruptEnable = 0;             // the receiver ready interrupt
-    itconfig.ReceiveStatusInterruptEnable = 0;       // the Receive Status Interrupt
-    itconfig.idleInterruptEnable = 0;                // the IDLE interrupt
-    itconfig.idleConditionDetect = 0;                // the Idle Condition Detect
-    itconfig.transmitterCompleteInterruptEnable = 0; // the Transmitter Complete interrupt
-    itconfig.receiverOverrunInterruptEnable = 0;     // the Receiver Overrun  Error interrupt
-    itconfig.receiverDataReadyInterruptEnable = 0;   // the Receiver Data Ready interrupt
+
+    itconfig.IT_receiver_ready = INTERRUPT_DISABLE;         // the receiver ready interrupt Enable(达到RxFIFO 设置的 接收数据数量门槛 则触发串口中断)
+    itconfig.IT_IDLE = INTERRUPT_DISABLE;                   // the IDLE interrupt Enable(RxFIFO数据为空+RX_DATA引脚达到由软件编程的空闲帧的数量则触发串口中断)
+    itconfig.IT_Receiver_Data_Ready = INTERRUPT_DISABLE;    // Receiver Data Ready Interrupt Enable(至少接收到一个字节数据，则触发串口中断,此状态位满足无数据就绪可读时,自动清零,可用于轮询读取)
+    itconfig.IT_Receiver_IDLE = INTERRUPT_DISABLE;          // the Receiver IDLE interrupt Enable(反应串口接收器的“工作状态”（空闲/接收中）,接收器空闲时,触发串口中断,推荐使用IDLE条件中断,不建议使用此中断)
+    itconfig.IT_Idle_Condition = INTERRUPT_DISABLE;         // the Idle Condition Detect(配置空闲的检测条件,可设置为4/8/16/32帧空闲)
+    itconfig.IT_transmitter_FIFO_empty = INTERRUPT_DISABLE; // the transmitter FIFO empty interrupt Enable(发送FIFO为空时，触发串口中断,当有数据写进去TxFIFO时，自动清零，也可用于轮询发送)
+    itconfig.IT_transmitter_ready = INTERRUPT_DISABLE;      // the transmitter ready interrupt Enable(达到TxFIFO 设置的 低于其现有的数据数量门槛时， 则触发串口中断，即可以往TxFIFO中写入数据时，触发串口中断，当TxFIFO中数据数量超过其设置值时，自动清零，可用于轮询发送)
+    itconfig.IT_Transmitter_Complete = INTERRUPT_DISABLE;   // the Transmitter Complete interrupt Enable(发送完成时，触发串口中断，可用于轮询发送，此状态位满足有数据写进去TxFIFO时，自动清零，可用于轮询读取)
+    itconfig.IT_Receiver_Overrun = INTERRUPT_DISABLE;       // Receiver Overrun  Error Interrupt Enable(当接收器发生溢出错误时，触发串口中断)
+    itconfig.irqHandler = uart1_irqHandler;                 // 绑定串口中断处理函数
+
     //初始化串口1中断
     BSP_UART_IT_Init(uartptrs, &itconfig);
 
@@ -182,43 +187,54 @@ void BSP_UART_Init(UART_Type *uart, UART_Config_t *uartconfig)
 
 }
 
+
 void BSP_UART_IT_Init(UART_Type *uart, UART_IT_Config_t *itconfig)
 {
     __UART_Register_IT_config_t __itconfig;
+    uint32_t Num,loop = 0;
 
+    
+    //寻找UART指针对应的串口标号
+    for(loop = 0; loop < 9; loop++)
+    {
+        if(uart == UART_base_ptrs[loop])
+        {
+            Num = loop;
+            break;
+        }
+    } 
 
+    //指定uart中断处理函数
+    uart_irq_handles[Num].irqHandler = itconfig->irqHandler;
 
-    //使能GIC UART中断
-
-    //注册中断处理函数
+    //使能GIC中对应的 UART中断
+    GIC_EnableIRQ(UART_irqs[Num]);
+    //注册UART 中断处理函数
+    system_register_irqhandler(UART_irqs[Num], (system_irq_handler_t)uart_irq_handles[Num].irqHandler, NULL);
     
     //使能UART外设中断配置
     memset(&__itconfig,0,sizeof(__UART_Register_IT_config_t));
 
-
-    __itconfig.UART_UCR1_TRDYEN = itconfig.txReadyInterruptEnable;             // the transmitter ready interrupt
-    __itconfig.UART_UCR1_TXMPTYEN = itconfig.txEmptyInterruptEnable;             // the transmitter FIFO empty interrupt
-    __itconfig.UART_UCR1_RRDYEN = itconfig.rxReadyInterruptEnable;             // the receiver ready interrupt
-    itconfig.ReceiveStatusInterruptEnable;       // the Receive Status Interrupt
-    __itconfig.UART_UCR1_IDEN = itconfig.idleInterruptEnable;                // the IDLE interrupt
-    __itconfig.UART_UCR1_ICD = itconfig.idleConditionDetect;                // the Idle Condition Detect
-    __itconfig.UART_UCR4_TCEN = itconfig.transmitterCompleteInterruptEnable; // the Transmitter Complete interrupt
-    __itconfig.UART_UCR4_OREN = itconfig.receiverOverrunInterruptEnable;     // the Receiver Overrun  Error interrupt
-    __itconfig.UART_UCR4_DREN = itconfig.receiverDataReadyInterruptEnable;   // the Receiver Data Ready interrupt
-
-typedef struct
-{
+    __itconfig.UART_UCR1_RRDYEN   = itconfig->IT_receiver_ready;             // the receiver ready interrupt Enable(达到RxFIFO 设置的 接收数据数量门槛 则触发串口中断)
+    __itconfig.UART_UCR1_IDEN     = itconfig->IT_IDLE;                       // the IDLE interrupt Enable(RxFIFO数据为空+RX_DATA引脚达到由软件编程的空闲帧的数量则触发串口中断)
+    __itconfig.UART_UCR4_DREN     = itconfig->IT_Receiver_Data_Ready;        // Receiver Data Ready Interrupt Enable(至少接收到一个字节数据，则触发串口中断,此状态位满足无数据就绪可读时,自动清零,可用于轮询读取)
+    __itconfig.UART_UCR3_RXDSEN   = itconfig->IT_Receiver_IDLE;              // the Receiver IDLE interrupt Enable(反应串口接收器的“工作状态”（空闲/接收中）,接收器空闲时,触发串口中断,推荐使用IDLE条件中断,不建议使用此中断)
+    __itconfig.UART_UCR1_ICD      = itconfig->IT_Idle_Condition;             // the Idle Condition Detect(配置空闲的检测条件,可设置为4/8/16/32帧空闲)
+    __itconfig.UART_UCR1_TXMPTYEN = itconfig->IT_transmitter_FIFO_empty;     // the transmitter FIFO empty interrupt Enable(发送FIFO为空时，触发串口中断,当有数据写进去TxFIFO时，自动清零，也可用于轮询发送)
+    __itconfig.UART_UCR1_TRDYEN   = itconfig->IT_transmitter_ready;          // the transmitter ready interrupt Enable(达到TxFIFO 设置的 低于其现有的数据数量门槛时， 则触发串口中断，即可以往TxFIFO中写入数据时，触发串口中断，当TxFIFO中数据数量超过其设置值时，自动清零，可用于轮询发送)
+    __itconfig.UART_UCR4_TCEN     = itconfig->IT_Transmitter_Complete;       // the Transmitter Complete interrupt Enable(发送完成时，触发串口中断，可用于轮询发送，此状态位满足有数据写进去TxFIFO时，自动清零，可用于轮询读取)
+    __itconfig.UART_UCR4_OREN     = itconfig->IT_Receiver_Overrun;           // Receiver Overrun  Error Interrupt Enable(当接收器发生溢出错误时，触发串口中断)
 
 
-
-    __itconfig.UART_UCR3_RXDSEN;   // the Receiver IDLE interrupt Enable
-
-
-
-    __itconfig.UART_UCR4_OREN;     // Receiver Overrun  Error Interrupt Enable
-
-} __UART_Register_IT_config_t;
-
+    SET_BIT(&uart->UCR1, UART_UCR1_RRDYEN_MASK, UART_UCR1_RRDYEN(__itconfig.UART_UCR1_RRDYEN));
+    SET_BIT(&uart->UCR1, UART_UCR1_IDEN_MASK, UART_UCR1_IDEN(__itconfig.UART_UCR1_IDEN));
+    SET_BIT(&uart->UCR4, UART_UCR4_DREN_MASK, UART_UCR4_DREN(__itconfig.UART_UCR4_DREN));
+    SET_BIT(&uart->UCR3, UART_UCR3_RXDSEN_MASK, UART_UCR3_RXDSEN(__itconfig.UART_UCR3_RXDSEN));
+    SET_BIT(&uart->UCR1, UART_UCR1_ICD_MASK, UART_UCR1_ICD(__itconfig.UART_UCR1_ICD));
+    SET_BIT(&uart->UCR1, UART_UCR1_TXMPTYEN_MASK, UART_UCR1_TXMPTYEN(__itconfig.UART_UCR1_TXMPTYEN));
+    SET_BIT(&uart->UCR1, UART_UCR1_TRDYEN_MASK, UART_UCR1_TRDYEN(__itconfig.UART_UCR1_TRDYEN));
+    SET_BIT(&uart->UCR4, UART_UCR4_TCEN_MASK, UART_UCR4_TCEN(__itconfig.UART_UCR4_TCEN));
+    SET_BIT(&uart->UCR4, UART_UCR4_OREN_MASK, UART_UCR4_OREN(__itconfig.UART_UCR4_OREN));
 
 }
 
@@ -235,4 +251,11 @@ void BSP_UART_Disable(UART_Type *uart)
     // 配置串口:按照使能需求进行配置
     // the UART Status:0-Disable the UART,1-Enable the UART
     SET_BIT(&uart->UCR1, UART_UCR1_UARTEN_MASK, UART_UCR1_UARTEN(0));
+}
+
+
+
+void uart1_irqHandler(void)
+{
+
 }

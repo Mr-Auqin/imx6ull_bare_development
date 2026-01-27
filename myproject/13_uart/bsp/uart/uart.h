@@ -71,6 +71,26 @@
 		*(REG_ADDR) = _reg_val;                                \
 	} while (0) // do-while保证宏作为语句调用时语法合法
 
+
+
+#define UART_Number 8   // 串口个数
+
+
+/* 中断服务函数形式 */ 
+typedef void (*uart_irq_handler_t) (void);
+//定义一个函数指针类型 uart_irq_handler_t
+
+ 
+/* 中断服务函数结构体*/
+typedef struct _uart_irq_handle
+{
+    uart_irq_handler_t irqHandler; /* 中断服务函数指针 */
+
+} uart_irq_handle_t;
+
+
+
+
 typedef struct
 {
 
@@ -93,22 +113,11 @@ typedef struct
     uint32_t IT_Receiver_Data_Ready;    // Receiver Data Ready Interrupt Enable(至少接收到一个字节数据，则触发串口中断,此状态位满足无数据就绪可读时,自动清零,可用于轮询读取)
     uint32_t IT_Receiver_IDLE;          // the Receiver IDLE interrupt Enable(反应串口接收器的“工作状态”（空闲/接收中）,接收器空闲时,触发串口中断,推荐使用IDLE条件中断,不建议使用此中断)
     uint32_t IT_Idle_Condition;         // the Idle Condition Detect(配置空闲的检测条件,可设置为4/8/16/32帧空闲)
-    uint32_t IT_transmitter_FIFO_empty; // the transmitter FIFO empty interrupt Enable
-    uint32_t IT_transmitter_ready;      // the transmitter ready interrupt Enable
-    uint32_t IT_Transmitter_Complete;   // the Transmitter Complete interrupt Enable
-    uint32_t IT_Receiver_Overrun;       // Receiver Overrun  Error Interrupt Enable
-
-  
-
-    uint32_t UART_UCR3_RXDSEN;   // the Receiver IDLE interrupt Enable
-    uint32_t UART_UCR1_ICD;      // the Idle Condition Detect
-    uint32_t UART_UCR1_TXMPTYEN; // the transmitter FIFO empty interrupt Enable
-    uint32_t UART_UCR1_TRDYEN;   // the transmitter ready interrupt Enable
-    uint32_t UART_UCR4_TCEN;     // the Transmitter Complete interrupt Enable
-    uint32_t UART_UCR4_OREN;     // Receiver Overrun  Error Interrupt Enable
-
-
-
+    uint32_t IT_transmitter_FIFO_empty; // the transmitter FIFO empty interrupt Enable(发送FIFO为空时，触发串口中断,当有数据写进去TxFIFO时，自动清零，也可用于轮询发送)
+    uint32_t IT_transmitter_ready;      // the transmitter ready interrupt Enable(达到TxFIFO 设置的 低于其现有的数据数量门槛时， 则触发串口中断，即可以往TxFIFO中写入数据时，触发串口中断，当TxFIFO中数据数量超过其设置值时，自动清零，可用于轮询发送)
+    uint32_t IT_Transmitter_Complete;   // the Transmitter Complete interrupt Enable(发送完成时，触发串口中断，可用于轮询发送，此状态位满足有数据写进去TxFIFO时，自动清零，可用于轮询读取)
+    uint32_t IT_Receiver_Overrun;       // Receiver Overrun  Error Interrupt Enable(当接收器发生溢出错误时，触发串口中断)
+    uart_irq_handler_t irqHandler;     // 中断服务函数
 
 } UART_IT_Config_t;
 
@@ -135,16 +144,15 @@ typedef struct
 
 typedef struct
 {
-    uint32_t UART_UCR1_RRDYEN;   // the receiver ready interrupt Enable
-    uint32_t UART_UCR1_IDEN;     // the IDLE interrupt Enable
-    uint32_t UART_UCR4_DREN;     // Receiver Data Ready Interrupt Enable
-    uint32_t UART_UCR3_RXDSEN;   // the Receiver IDLE interrupt Enable
-    uint32_t UART_UCR1_ICD;      // the Idle Condition Detect
-    uint32_t UART_UCR1_TXMPTYEN; // the transmitter FIFO empty interrupt Enable
-    uint32_t UART_UCR1_TRDYEN;   // the transmitter ready interrupt Enable
-    uint32_t UART_UCR4_TCEN;     // the Transmitter Complete interrupt Enable
-    uint32_t UART_UCR4_OREN;     // Receiver Overrun  Error Interrupt Enable
-
+    uint32_t UART_UCR1_RRDYEN;   // the receiver ready interrupt Enable(达到RxFIFO 设置的 接收数据数量门槛 则触发串口中断)
+    uint32_t UART_UCR1_IDEN;     // the IDLE interrupt Enable(RxFIFO数据为空+RX_DATA引脚达到由软件编程的空闲帧的数量则触发串口中断)
+    uint32_t UART_UCR4_DREN;     // Receiver Data Ready Interrupt Enable(至少接收到一个字节数据，则触发串口中断,此状态位满足无数据就绪可读时,自动清零,可用于轮询读取)
+    uint32_t UART_UCR3_RXDSEN;   // the Receiver IDLE interrupt Enable(反应串口接收器的“工作状态”（空闲/接收中）,接收器空闲时,触发串口中断,推荐使用IDLE条件中断,不建议使用此中断)
+    uint32_t UART_UCR1_ICD;      // the Idle Condition Detect(配置空闲的检测条件,可设置为4/8/16/32帧空闲)
+    uint32_t UART_UCR1_TXMPTYEN; // the transmitter FIFO empty interrupt Enable(发送FIFO为空时，触发串口中断,当有数据写进去TxFIFO时，自动清零，也可用于轮询发送)
+    uint32_t UART_UCR1_TRDYEN;   // the transmitter ready interrupt Enable(达到TxFIFO 设置的 低于其现有的数据数量门槛时， 则触发串口中断，即可以往TxFIFO中写入数据时，触发串口中断，当TxFIFO中数据数量超过其设置值时，自动清零，可用于轮询发送)
+    uint32_t UART_UCR4_TCEN;     // the Transmitter Complete interrupt Enable(发送完成时，触发串口中断，可用于轮询发送，此状态位满足有数据写进去TxFIFO时，自动清零，可用于轮询读取)
+    uint32_t UART_UCR4_OREN;     // Receiver Overrun  Error Interrupt Enable(当接收器发生溢出错误时，触发串口中断)
 } __UART_Register_IT_config_t;
 
 /**
