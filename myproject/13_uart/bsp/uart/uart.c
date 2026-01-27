@@ -16,6 +16,8 @@ void UART_Init(void)
 
     //UART_Config_t 功能配置结构体
     UART_Config_t UARTconfig;
+    //UART_IT_Config_t  中断配置结构体
+    UART_IT_Config_t itconfig;
     //获取串口1外设的寄存器结构体指针
     UART_Type* uartptrs = UART_GetInstance(1);
 
@@ -65,8 +67,8 @@ void UART_Init(void)
 
 
 
-    //GPTconfig_t 结构体清零
-    memset(&UARTconfig, 0, sizeof(UARTconfig));
+    //UARTconfig 结构体清零
+    memset(&UARTconfig, 0, sizeof(UART_Config_t));
     //配置结构体成员:具体串口配置
     UARTconfig.clocksource = UART_clksource_from_pll3_80M;
     UARTconfig.clockdivider = UART_clk_divider_1;
@@ -77,11 +79,25 @@ void UART_Init(void)
     UARTconfig.stopbits = UART_STOPBITS_1;
     UARTconfig.senderEnable = UART_Sender_ENABLE;
     UARTconfig.receiverEnable = UART_Receiver_ENABLE;
-
     //初始化串口1
     BSP_UART_Init(uartptrs, &UARTconfig);
 
+    //itconfig 结构体清零
+    memset(&itconfig, 0, sizeof(UART_IT_Config_t));
+    itconfig.txReadyInterruptEnable = 0;             // the transmitter ready interrupt
+    itconfig.txEmptyInterruptEnable = 0;             // the transmitter FIFO empty interrupt
+    itconfig.rxReadyInterruptEnable = 0;             // the receiver ready interrupt
+    itconfig.ReceiveStatusInterruptEnable = 0;       // the Receive Status Interrupt
+    itconfig.idleInterruptEnable = 0;                // the IDLE interrupt
+    itconfig.idleConditionDetect = 0;                // the Idle Condition Detect
+    itconfig.transmitterCompleteInterruptEnable = 0; // the Transmitter Complete interrupt
+    itconfig.receiverOverrunInterruptEnable = 0;     // the Receiver Overrun  Error interrupt
+    itconfig.receiverDataReadyInterruptEnable = 0;   // the Receiver Data Ready interrupt
+    //初始化串口1中断
+    BSP_UART_IT_Init(uartptrs, &itconfig);
 
+    //使能串口
+    BSP_UART_Enable(uartptrs);
 }
 
 void BSP_UART_Init(UART_Type *uart, UART_Config_t *uartconfig)
@@ -164,14 +180,59 @@ void BSP_UART_Init(UART_Type *uart, UART_Config_t *uartconfig)
     SET_BIT(&uart->UCR2, UART_UCR2_TXEN_MASK, UART_UCR2_TXEN(field_config.__UART_UCR2_TXEN));
     SET_BIT(&uart->UCR2, UART_UCR2_RXEN_MASK, UART_UCR2_RXEN(field_config.__UART_UCR2_RXEN));
 
-    // 配置发送器和接收器:按照使能需求进行配置
-    field_config.__UART_UCR1_UARTEN = 1;     // the UART Status:0-Disable the UART,1-Enable the UART
-    SET_BIT(&uart->UCR1, UART_UCR1_UARTEN_MASK, UART_UCR1_UARTEN(field_config.__UART_UCR1_UARTEN));
+}
+
+void BSP_UART_IT_Init(UART_Type *uart, UART_IT_Config_t *itconfig)
+{
+    __UART_Register_IT_config_t __itconfig;
+
+
+
+    //使能GIC UART中断
+
+    //注册中断处理函数
+    
+    //使能UART外设中断配置
+    memset(&__itconfig,0,sizeof(__UART_Register_IT_config_t));
+
+
+    __itconfig.UART_UCR1_TRDYEN = itconfig.txReadyInterruptEnable;             // the transmitter ready interrupt
+    __itconfig.UART_UCR1_TXMPTYEN = itconfig.txEmptyInterruptEnable;             // the transmitter FIFO empty interrupt
+    __itconfig.UART_UCR1_RRDYEN = itconfig.rxReadyInterruptEnable;             // the receiver ready interrupt
+    itconfig.ReceiveStatusInterruptEnable;       // the Receive Status Interrupt
+    __itconfig.UART_UCR1_IDEN = itconfig.idleInterruptEnable;                // the IDLE interrupt
+    __itconfig.UART_UCR1_ICD = itconfig.idleConditionDetect;                // the Idle Condition Detect
+    __itconfig.UART_UCR4_TCEN = itconfig.transmitterCompleteInterruptEnable; // the Transmitter Complete interrupt
+    __itconfig.UART_UCR4_OREN = itconfig.receiverOverrunInterruptEnable;     // the Receiver Overrun  Error interrupt
+    __itconfig.UART_UCR4_DREN = itconfig.receiverDataReadyInterruptEnable;   // the Receiver Data Ready interrupt
+
+typedef struct
+{
+
+
+
+    __itconfig.UART_UCR3_RXDSEN;   // the Receiver IDLE interrupt Enable
+
+
+
+    __itconfig.UART_UCR4_OREN;     // Receiver Overrun  Error Interrupt Enable
+
+} __UART_Register_IT_config_t;
+
 
 }
 
+void BSP_UART_Enable(UART_Type *uart)
+{
+    // 配置串口:按照使能需求进行配置
+    // the UART Status:0-Disable the UART,1-Enable the UART
+    SET_BIT(&uart->UCR1, UART_UCR1_UARTEN_MASK, UART_UCR1_UARTEN(1));
 
+}
 
-
-
-
+void BSP_UART_Disable(UART_Type *uart)
+{
+    // 配置串口:按照使能需求进行配置
+    // the UART Status:0-Disable the UART,1-Enable the UART
+    SET_BIT(&uart->UCR1, UART_UCR1_UARTEN_MASK, UART_UCR1_UARTEN(0));
+}

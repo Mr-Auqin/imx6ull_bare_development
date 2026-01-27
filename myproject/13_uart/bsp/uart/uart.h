@@ -88,15 +88,27 @@ typedef struct
 
 typedef struct
 {
-    uint32_t txReadyInterruptEnable;             // the transmitter ready interrupt
-    uint32_t txEmptyInterruptEnable;             // the transmitter FIFO empty interrupt
-    uint32_t rxReadyInterruptEnable;             // the receiver ready interrupt
-    uint32_t ReceiveStatusInterruptEnable;       // the Receive Status Interrupt
-    uint32_t idleInterruptEnable;                // the IDLE interrupt
-    uint32_t idleConditionDetect;                // the Idle Condition Detect
-    uint32_t transmitterCompleteInterruptEnable; // the Transmitter Complete interrupt
-    uint32_t receiverOverrunInterruptEnable;     // the Receiver Overrun  Error interrupt
-    uint32_t receiverDataReadyInterruptEnable;   // the Receiver Data Ready interrupt
+    uint32_t IT_receiver_ready;         // the receiver ready interrupt Enable(达到RxFIFO 设置的 接收数据数量门槛 则触发串口中断)
+    uint32_t IT_IDLE;                   // the IDLE interrupt Enable(RxFIFO数据为空+RX_DATA引脚达到由软件编程的空闲帧的数量则触发串口中断)
+    uint32_t IT_Receiver_Data_Ready;    // Receiver Data Ready Interrupt Enable(至少接收到一个字节数据，则触发串口中断,此状态位满足无数据就绪可读时,自动清零,可用于轮询读取)
+    uint32_t IT_Receiver_IDLE;          // the Receiver IDLE interrupt Enable(反应串口接收器的“工作状态”（空闲/接收中）,接收器空闲时,触发串口中断,推荐使用IDLE条件中断,不建议使用此中断)
+    uint32_t IT_Idle_Condition;         // the Idle Condition Detect(配置空闲的检测条件,可设置为4/8/16/32帧空闲)
+    uint32_t IT_transmitter_FIFO_empty; // the transmitter FIFO empty interrupt Enable
+    uint32_t IT_transmitter_ready;      // the transmitter ready interrupt Enable
+    uint32_t IT_Transmitter_Complete;   // the Transmitter Complete interrupt Enable
+    uint32_t IT_Receiver_Overrun;       // Receiver Overrun  Error Interrupt Enable
+
+  
+
+    uint32_t UART_UCR3_RXDSEN;   // the Receiver IDLE interrupt Enable
+    uint32_t UART_UCR1_ICD;      // the Idle Condition Detect
+    uint32_t UART_UCR1_TXMPTYEN; // the transmitter FIFO empty interrupt Enable
+    uint32_t UART_UCR1_TRDYEN;   // the transmitter ready interrupt Enable
+    uint32_t UART_UCR4_TCEN;     // the Transmitter Complete interrupt Enable
+    uint32_t UART_UCR4_OREN;     // Receiver Overrun  Error Interrupt Enable
+
+
+
 
 } UART_IT_Config_t;
 
@@ -166,8 +178,9 @@ void UART_Init(void);
  * @param uartconfig The UART configuration
  */
 void BSP_UART_Init(UART_Type *uart, UART_Config_t *uartconfig);
-void BSP_UART_Start(UART_Type *UART);
-void BSP_UART_Stop(UART_Type *UART);
+void BSP_UART_IT_Init(UART_Type *uart, UART_IT_Config_t *itconfig);
+void BSP_UART_Enable(UART_Type *uart);
+void BSP_UART_Disable(UART_Type *uart);
 
 /**
  * @brief Transmits data through a UART instance
