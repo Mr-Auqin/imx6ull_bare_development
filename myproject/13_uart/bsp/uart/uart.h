@@ -76,17 +76,111 @@
 #define UART_Number 8   // 串口个数
 
 
-/* 中断服务函数形式 */ 
-typedef void (*uart_irq_handler_t) (void);
-//定义一个函数指针类型 uart_irq_handler_t
 
- 
-/* 中断服务函数结构体*/
-typedef struct _uart_irq_handle
+/**
+  * @brief  UART handle Structure definition
+  */
+typedef struct __UART_HandleTypeDef
 {
-    uart_irq_handler_t irqHandler; /* 中断服务函数指针 */
+  USART_TypeDef            *Instance;                /*!< UART registers base address        */
 
-} uart_irq_handle_t;
+  UART_InitTypeDef         Init;                     /*!< UART communication parameters      */
+
+  UART_AdvFeatureInitTypeDef AdvancedInit;           /*!< UART Advanced Features initialization parameters */
+
+  const uint8_t            *pTxBuffPtr;              /*!< Pointer to UART Tx transfer Buffer */
+
+  uint16_t                 TxXferSize;               /*!< UART Tx Transfer size              */
+
+  __IO uint16_t            TxXferCount;              /*!< UART Tx Transfer Counter           */
+
+  uint8_t                  *pRxBuffPtr;              /*!< Pointer to UART Rx transfer Buffer */
+
+  uint16_t                 RxXferSize;               /*!< UART Rx Transfer size              */
+
+  __IO uint16_t            RxXferCount;              /*!< UART Rx Transfer Counter           */
+
+  uint16_t                 Mask;                     /*!< UART Rx RDR register mask          */
+
+  uint32_t                 FifoMode;                 /*!< Specifies if the FIFO mode is being used.
+                                                          This parameter can be a value of @ref UARTEx_FIFO_mode. */
+
+  uint16_t                 NbRxDataToProcess;        /*!< Number of data to process during RX ISR execution */
+
+  uint16_t                 NbTxDataToProcess;        /*!< Number of data to process during TX ISR execution */
+
+  __IO HAL_UART_RxTypeTypeDef ReceptionType;         /*!< Type of ongoing reception          */
+
+  __IO HAL_UART_RxEventTypeTypeDef RxEventType;      /*!< Type of Rx Event                   */
+
+  void (*RxISR)(struct __UART_HandleTypeDef *huart); /*!< Function pointer on Rx IRQ handler */
+
+  void (*TxISR)(struct __UART_HandleTypeDef *huart); /*!< Function pointer on Tx IRQ handler */
+
+  DMA_HandleTypeDef        *hdmatx;                  /*!< UART Tx DMA Handle parameters      */
+
+  DMA_HandleTypeDef        *hdmarx;                  /*!< UART Rx DMA Handle parameters      */
+
+  HAL_LockTypeDef           Lock;                    /*!< Locking object                     */
+
+  __IO HAL_UART_StateTypeDef    gState;              /*!< UART state information related to global Handle management
+                                                          and also related to Tx operations. This parameter
+                                                          can be a value of @ref HAL_UART_StateTypeDef */
+
+  __IO HAL_UART_StateTypeDef    RxState;             /*!< UART state information related to Rx operations. This
+                                                          parameter can be a value of @ref HAL_UART_StateTypeDef */
+
+  __IO uint32_t                 ErrorCode;           /*!< UART Error code                    */
+
+#if (USE_HAL_UART_REGISTER_CALLBACKS == 1)
+  void (* TxHalfCpltCallback)(struct __UART_HandleTypeDef *huart);        /*!< UART Tx Half Complete Callback        */
+  void (* TxCpltCallback)(struct __UART_HandleTypeDef *huart);            /*!< UART Tx Complete Callback             */
+  void (* RxHalfCpltCallback)(struct __UART_HandleTypeDef *huart);        /*!< UART Rx Half Complete Callback        */
+  void (* RxCpltCallback)(struct __UART_HandleTypeDef *huart);            /*!< UART Rx Complete Callback             */
+  void (* ErrorCallback)(struct __UART_HandleTypeDef *huart);             /*!< UART Error Callback                   */
+  void (* AbortCpltCallback)(struct __UART_HandleTypeDef *huart);         /*!< UART Abort Complete Callback          */
+  void (* AbortTransmitCpltCallback)(struct __UART_HandleTypeDef *huart); /*!< UART Abort Transmit Complete Callback */
+  void (* AbortReceiveCpltCallback)(struct __UART_HandleTypeDef *huart);  /*!< UART Abort Receive Complete Callback  */
+  void (* WakeupCallback)(struct __UART_HandleTypeDef *huart);            /*!< UART Wakeup Callback                  */
+  void (* RxFifoFullCallback)(struct __UART_HandleTypeDef *huart);        /*!< UART Rx Fifo Full Callback            */
+  void (* TxFifoEmptyCallback)(struct __UART_HandleTypeDef *huart);       /*!< UART Tx Fifo Empty Callback           */
+  void (* RxEventCallback)(struct __UART_HandleTypeDef *huart, uint16_t Pos); /*!< UART Reception Event Callback     */
+
+  void (* MspInitCallback)(struct __UART_HandleTypeDef *huart);           /*!< UART Msp Init callback                */
+  void (* MspDeInitCallback)(struct __UART_HandleTypeDef *huart);         /*!< UART Msp DeInit callback              */
+#endif  /* USE_HAL_UART_REGISTER_CALLBACKS */
+
+} UART_HandleTypeDef;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -257,7 +351,6 @@ void BSP_UART_Transmit_DMA(UART_Type *uart, uint8_t *data, uint32_t len);
 void BSP_UART_Receive_DMA(UART_Type *uart, uint8_t *data, uint32_t len);
 
 void BSP_UART_Get_Flag(UART_Type *uart, uint32_t flag);
-void BSP_UART_Clear_Flag(UART_Type *uart, uint32_t flag);
 void BSP_UART_Clear_Flag(UART_Type *uart, uint32_t flag);
 
 #endif /* __UART_H */

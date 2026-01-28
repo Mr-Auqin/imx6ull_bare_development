@@ -96,7 +96,7 @@ void UART_Init(void)
     itconfig.IT_transmitter_ready = INTERRUPT_DISABLE;      // the transmitter ready interrupt Enable(达到TxFIFO 设置的 低于其现有的数据数量门槛时， 则触发串口中断，即可以往TxFIFO中写入数据时，触发串口中断，当TxFIFO中数据数量超过其设置值时，自动清零，可用于轮询发送)
     itconfig.IT_Transmitter_Complete = INTERRUPT_DISABLE;   // the Transmitter Complete interrupt Enable(发送完成时，触发串口中断，可用于轮询发送，此状态位满足有数据写进去TxFIFO时，自动清零，可用于轮询读取)
     itconfig.IT_Receiver_Overrun = INTERRUPT_DISABLE;       // Receiver Overrun  Error Interrupt Enable(当接收器发生溢出错误时，触发串口中断)
-    itconfig.irqHandler = uart1_irqHandler;                 // 绑定串口中断处理函数
+    itconfig.irqHandler = uart1_irq_handler;;                 // 绑定串口中断处理函数
 
     //初始化串口1中断
     BSP_UART_IT_Init(uartptrs, &itconfig);
@@ -185,6 +185,10 @@ void BSP_UART_Init(UART_Type *uart, UART_Config_t *uartconfig)
     SET_BIT(&uart->UCR2, UART_UCR2_TXEN_MASK, UART_UCR2_TXEN(field_config.__UART_UCR2_TXEN));
     SET_BIT(&uart->UCR2, UART_UCR2_RXEN_MASK, UART_UCR2_RXEN(field_config.__UART_UCR2_RXEN));
 
+    // 配置串口使能
+    field_config.__UART_UCR1_UARTEN = 1;    // the UART UARTEN:0-Disable the UART,1-Enable the UART
+    SET_BIT(&uart->UCR1, UART_UCR1_UARTEN_MASK, UART_UCR1_UARTEN(field_config.__UART_UCR1_UARTEN));
+
 }
 
 
@@ -204,13 +208,10 @@ void BSP_UART_IT_Init(UART_Type *uart, UART_IT_Config_t *itconfig)
         }
     } 
 
-    //指定uart中断处理函数
-    uart_irq_handles[Num].irqHandler = itconfig->irqHandler;
-
     //使能GIC中对应的 UART中断
     GIC_EnableIRQ(UART_irqs[Num]);
     //注册UART 中断处理函数
-    system_register_irqhandler(UART_irqs[Num], (system_irq_handler_t)uart_irq_handles[Num].irqHandler, NULL);
+    system_register_irqhandler(UART_irqs[Num], (system_irq_handler_t)itconfig->irqHandler, NULL);
     
     //使能UART外设中断配置
     memset(&__itconfig,0,sizeof(__UART_Register_IT_config_t));
@@ -253,9 +254,47 @@ void BSP_UART_Disable(UART_Type *uart)
     SET_BIT(&uart->UCR1, UART_UCR1_UARTEN_MASK, UART_UCR1_UARTEN(0));
 }
 
+void BSP_UART_Transmit(UART_Type *uart, uint8_t *data, uint32_t len)
+{
+}
 
+void BSP_UART_Receive(UART_Type *uart, uint8_t *data, uint32_t len)
+{
+}
 
-void uart1_irqHandler(void)
+void BSP_UART_Transmit_IT(UART_Type *uart, uint8_t *data, uint32_t len)
+{
+}
+
+void BSP_UART_Receive_IT(UART_Type *uart, uint8_t *data, uint32_t len)
+{
+}
+
+void BSP_UART_Transmit_DMA(UART_Type *uart, uint8_t *data, uint32_t len)
+{
+}
+
+void BSP_UART_Receive_DMA(UART_Type *uart, uint8_t *data, uint32_t len)
+{
+}
+
+void BSP_UART_Get_Flag(UART_Type *uart, uint32_t flag)
 {
 
+
+
+}
+
+void BSP_UART_Clear_Flag(UART_Type *uart, uint32_t flag)
+{
+
+
+
+}
+
+
+
+void uart1_irq_handler(void)
+{
+    BSP_UART_IRQ_Handler(UART_Type *uart);
 }
