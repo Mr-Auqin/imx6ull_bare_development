@@ -167,9 +167,6 @@ void BSP_UART_Init(UART_HandleTypeDef *huart)
     SET_BIT(&huart->Instance->UBMR, UART_UBMR_MOD_MASK, UART_UBMR_MOD(field_config.__UART_UBMR_MOD));
     
 
-
-
-    
     // 配置发送器和接收器:按照使能需求进行配置
     field_config.__UART_UCR2_TXEN = huart->Config.senderEnable;   // Transmitter Enable: 0-Disable the transmitter, 1-Enable the transmitter
     field_config.__UART_UCR2_RXEN = huart->Config.receiverEnable; // Receiver Enable: 0-Disable the receiver, 1-Enable the receiver
