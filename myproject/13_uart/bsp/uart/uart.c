@@ -28,7 +28,7 @@ void UART_Init(void)
      *bit [16]:0 HYS 关闭
      *bit [15:14]: 00 100K 下拉
      *bit [13]: 0 kepper 功能
-     *bit [12]: 0 pull/keeper 功能  enable
+     *bit [12]: 1 pull/keeper 功能  enable
      *bit [11]: 0 关闭开路输出
      *bit [7:6]: 10 速度 100Mhz
      *bit [5:3]: 110 R0/6 驱动能力
@@ -47,7 +47,7 @@ void UART_Init(void)
      *bit [16]:0 HYS 关闭
      *bit [15:14]: 00 100K 下拉
      *bit [13]: 0 kepper 功能
-     *bit [12]: 0 pull/keeper 功能  enable
+     *bit [12]: 1 pull/keeper 功能  enable
      *bit [11]: 0 关闭开路输出
      *bit [7:6]: 10 速度 100Mhz
      *bit [5:3]: 110 R0/6 驱动能力
@@ -66,7 +66,7 @@ void UART_Init(void)
     huart1.Instance = uartptrs;
     huart1.Config.clocksource = UART_clksource_from_pll3_80M;
     huart1.Config.clockdivider = UART_clk_divider_1;
-    huart1.Config.modeselect = UART_mode_DTE;
+    huart1.Config.modeselect = UART_mode_DCE;
     huart1.Config.baudrate = 115200;
     huart1.Config.databits = UART_WORDLENGTH_8B;
     huart1.Config.parity = UART_PARITY_NONE;
@@ -75,7 +75,6 @@ void UART_Init(void)
     huart1.Config.receiverEnable = UART_Receiver_ENABLE;
     //初始化串口1
     BSP_UART_Init(&huart1);
-
 
     huart1.IT_Config.IT_receiver_ready = INTERRUPT_DISABLE;         // the receiver ready interrupt Enable(达到RxFIFO 设置的 接收数据数量门槛 则触发串口中断)
     huart1.IT_Config.IT_IDLE = INTERRUPT_DISABLE;                   // the IDLE interrupt Enable(RxFIFO数据为空+RX_DATA引脚达到由软件编程的空闲帧的数量则触发串口中断)
@@ -97,10 +96,10 @@ void UART_Init(void)
 
 void BSP_UART_Init(UART_HandleTypeDef *huart)
 {
-    __UART_Register_field_config_t field_config;
+    __UART_Register_field_config_t field_config = {0};
     
     //初始化栈中的局部变量结构体
-    memset(&field_config, 0, sizeof(field_config));
+    // memset(&field_config, 0, sizeof(field_config));
 
     //配置串口时钟源,选择时钟源时钟分频为1
     SET_BIT(&CCM->CSCDR1, CCM_CSCDR1_UART_CLK_SEL_MASK, CCM_CSCDR1_UART_CLK_SEL(huart->Config.clocksource));
@@ -168,24 +167,20 @@ void BSP_UART_Init(UART_HandleTypeDef *huart)
     SET_BIT(&huart->Instance->UBMR, UART_UBMR_MOD_MASK, UART_UBMR_MOD(field_config.__UART_UBMR_MOD));
     
 
-
     // 配置发送器和接收器:按照使能需求进行配置
     field_config.__UART_UCR2_TXEN = huart->Config.senderEnable;   // Transmitter Enable: 0-Disable the transmitter, 1-Enable the transmitter
     field_config.__UART_UCR2_RXEN = huart->Config.receiverEnable; // Receiver Enable: 0-Disable the receiver, 1-Enable the receiver
     SET_BIT(&huart->Instance->UCR2, UART_UCR2_TXEN_MASK, UART_UCR2_TXEN(field_config.__UART_UCR2_TXEN));
     SET_BIT(&huart->Instance->UCR2, UART_UCR2_RXEN_MASK, UART_UCR2_RXEN(field_config.__UART_UCR2_RXEN));
 
-    // 配置串口使能
-    field_config.__UART_UCR1_UARTEN = 1;    // the UART UARTEN:0-Disable the UART,1-Enable the UART
-    SET_BIT(&huart->Instance->UCR1, UART_UCR1_UARTEN_MASK, UART_UCR1_UARTEN(field_config.__UART_UCR1_UARTEN));
-
 }
 
 
 void BSP_UART_IT_Init(UART_HandleTypeDef *huart)
 {
-    __UART_Register_IT_config_t __itconfig;
-    uint32_t Num,loop = 0;
+    __UART_Register_IT_config_t __itconfig = {0};
+    uint32_t Num = 0;
+    uint32_t loop = 0;
 
     
     //寻找UART指针对应的串口标号
@@ -204,7 +199,7 @@ void BSP_UART_IT_Init(UART_HandleTypeDef *huart)
     system_register_irqhandler(UART_irqs[Num], (system_irq_handler_t)huart->IT_Config.irqHandler, NULL);
     
     //使能UART外设中断配置
-    memset(&__itconfig,0,sizeof(__UART_Register_IT_config_t));
+    // memset(&__itconfig,0,sizeof(__UART_Register_IT_config_t));
 
     __itconfig.UART_UCR1_RRDYEN   = huart->IT_Config.IT_receiver_ready;             // the receiver ready interrupt Enable(达到RxFIFO 设置的 接收数据数量门槛 则触发串口中断)
     __itconfig.UART_UCR1_IDEN     = huart->IT_Config.IT_IDLE;                       // the IDLE interrupt Enable(RxFIFO数据为空+RX_DATA引脚达到由软件编程的空闲帧的数量则触发串口中断)
@@ -291,9 +286,58 @@ void uart1_irq_handler(void)
 }
 
 
+void BSP_UART_IRQ_Handler(UART_HandleTypeDef *huart) {
 
 
 
+}
 
 
+/*
+ * @description : 发送一个字符
+ * @param - c	: 要发送的字符
+ * @return		: 无
+ */
+void putc(unsigned char c)
+{
+	while(((UART1->USR2 >> 3) &0X01) == 0);/* 等待上一次发送完成 */
+	UART1->UTXD = c & 0XFF; 				/* 发送数据 */
+}
 
+/*
+ * @description : 发送一个字符串
+ * @param - str	: 要发送的字符串
+ * @return		: 无
+ */
+void puts(char *str)
+{
+	char *p = str;
+
+	while(*p)
+		putc(*p++);
+}
+
+/*
+ * @description : 接收一个字符
+ * @param 		: 无
+ * @return		: 接收到的字符
+ */
+unsigned char getc(void)
+{
+	while((UART1->USR2 & 0x1) == 0);/* 等待接收完成 */
+	return UART1->URXD;				/* 返回接收到的数据 */
+}
+
+
+// // uart.h中声明标准原型的fputc（替代原putc）
+// int fputc(int c, FILE *stream);
+// // uart.c中实现
+// int fputc(int c, FILE *stream)
+// {
+//     // 强制转换为unsigned char，兼容你的串口发送逻辑
+//     unsigned char ch = (unsigned char)c;
+//     // 你的串口发送单个字符逻辑
+//     while(/* 发送缓冲区非空 */); // 等待
+//     UARTx_DR = ch; // 写入数据寄存器（示例）
+//     return c; // 标准库要求返回写入的字符
+// }

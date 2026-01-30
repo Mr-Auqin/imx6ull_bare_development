@@ -55,7 +55,7 @@ VPATH := $(SRCDIRS)
 
 $(TARGET).bin:$(OBJS)
 	@echo "Link $^ to $(TARGET).elf "
-	@$(LD) -Timx6ull.lds  -o $(TARGET).elf $^
+	@$(LD) -Timx6ull.lds -o $(TARGET).elf $^
 	@echo "OBJCOPY $(TARGET).elf to $@ "
 	@$(OBJCOPY) -O binary -S $(TARGET).elf $(TARGET).bin
 	@echo "OBJDUMP $(TARGET).elf to $(TARGET).dis "
@@ -67,12 +67,11 @@ $(TARGET).bin:$(OBJS)
 
 $(SOBJS):$(OUT_OBJDIR)/%.o:%.s
 	@echo "compile $< to $@ "
-	@$(CC)  -Wall -nostdlib  $(INCLUDES) -c -O2 $< -o $@
+	@$(CC)  -Wall -nostdlib -fno-builtin-puts -fno-builtin-putc $(INCLUDES) -c -O2 $< -o $@
 
 $(COBJS):$(OUT_OBJDIR)/%.o:%.c
 	@echo "compile $< to $@ "
-	@$(CC)  -Wall -nostdlib  $(INCLUDES) -c -O2 $< -o $@
-
+	@$(CC)  -Wall -nostdlib -fno-builtin-puts -fno-builtin-putc $(INCLUDES) -c -O2 $< -o $@
 clean:
 	rm -rf $(OUT_OBJDIR)/*.o *.bin *.elf *.dis
 
