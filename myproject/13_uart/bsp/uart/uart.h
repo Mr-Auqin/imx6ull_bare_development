@@ -15,8 +15,8 @@
 #define UART_clk_divider_1 5
 #define UART_clk_divider_7 6
 
-#define UART_mode_DCE 0
-#define UART_mode_DTE 1
+#define UART_mode_DCE 0    //最常用配置:DCE模式 芯片内部[TX引脚]是UART模块的TX脚  芯片内部[RX引脚]是UART模块的RX脚
+#define UART_mode_DTE 1    //DTE模式:芯片内部[TX引脚]是UART模块的RX脚  芯片内部[RX引脚]是UART模块的TX脚  TX和RX需要交换管脚时使用
 
 #define UART_WORDLENGTH_7B 0
 #define UART_WORDLENGTH_8B 1
@@ -75,35 +75,7 @@
 
 #define UART_Number 8   // 串口个数
 
-/**
- * @brief  UART handle Structure definition
- */
-typedef struct __UART_HandleTypeDef
-{
-    UART_Type *Instance;                                                       /*!< UART_Instance  */
-    UART_Config_t Config;                                                      /*!< UART communication parameters      */
-    UART_IT_Config_t IT_Config;                                                /*!< UART interrupt configuration parameters      */
-    const uint8_t *pTxBuffPtr;                                                 /*!< Pointer to UART Tx transfer Buffer */
-    uint16_t TxXferSize;                                                       /*!< UART Tx Transfer size              */
-    __IO uint16_t TxXferCount;                                                 /*!< UART Tx Transfer Counter           */
-    uint8_t *pRxBuffPtr;                                                       /*!< Pointer to UART Rx transfer Buffer */
-    uint16_t RxXferSize;                                                       /*!< UART Rx Transfer size              */
-    __IO uint16_t RxXferCount;                                                 /*!< UART Rx Transfer Counter           */
-    void (*TxHalfCpltCallback)(struct __UART_HandleTypeDef *huart);            /*!< UART Tx Half Complete Callback        */
-    void (*TxCpltCallback)(struct __UART_HandleTypeDef *huart);                /*!< UART Tx Complete Callback             */
-    void (*RxHalfCpltCallback)(struct __UART_HandleTypeDef *huart);            /*!< UART Rx Half Complete Callback        */
-    void (*RxCpltCallback)(struct __UART_HandleTypeDef *huart);                /*!< UART Rx Complete Callback             */
-    void (*ErrorCallback)(struct __UART_HandleTypeDef *huart);                 /*!< UART Error Callback                   */
-    void (*AbortCpltCallback)(struct __UART_HandleTypeDef *huart);             /*!< UART Abort Complete Callback          */
-    void (*AbortTransmitCpltCallback)(struct __UART_HandleTypeDef *huart);     /*!< UART Abort Transmit Complete Callback */
-    void (*AbortReceiveCpltCallback)(struct __UART_HandleTypeDef *huart);      /*!< UART Abort Receive Complete Callback  */
-    void (*WakeupCallback)(struct __UART_HandleTypeDef *huart);                /*!< UART Wakeup Callback                  */
-    void (*RxFifoFullCallback)(struct __UART_HandleTypeDef *huart);            /*!< UART Rx Fifo Full Callback            */
-    void (*TxFifoEmptyCallback)(struct __UART_HandleTypeDef *huart);           /*!< UART Tx Fifo Empty Callback           */
-    void (*RxEventCallback)(struct __UART_HandleTypeDef *huart, uint16_t Pos); /*!< UART Reception Event Callback     */
-    void (*MspInitCallback)(struct __UART_HandleTypeDef *huart);               /*!< UART Msp Init callback                */
-    void (*MspDeInitCallback)(struct __UART_HandleTypeDef *huart);             /*!< UART Msp DeInit callback              */
-} UART_HandleTypeDef;
+
 
 typedef struct
 {
@@ -169,6 +141,38 @@ typedef struct
     uint32_t UART_UCR4_OREN;     // Receiver Overrun  Error Interrupt Enable(当接收器发生溢出错误时，触发串口中断)
 } __UART_Register_IT_config_t;
 
+
+
+/**
+ * @brief  UART handle Structure definition
+ */
+typedef struct __UART_HandleTypeDef
+{
+    UART_Type *Instance;                                                       /*!< UART_Instance  */
+    UART_Config_t Config;                                                      /*!< UART communication parameters      */
+    UART_IT_Config_t IT_Config;                                                /*!< UART interrupt configuration parameters      */
+    const uint8_t *pTxBuffPtr;                                                 /*!< Pointer to UART Tx transfer Buffer */
+    uint16_t TxXferSize;                                                       /*!< UART Tx Transfer size              */
+    __IO uint16_t TxXferCount;                                                 /*!< UART Tx Transfer Counter           */
+    uint8_t *pRxBuffPtr;                                                       /*!< Pointer to UART Rx transfer Buffer */
+    uint16_t RxXferSize;                                                       /*!< UART Rx Transfer size              */
+    __IO uint16_t RxXferCount;                                                 /*!< UART Rx Transfer Counter           */
+    void (*TxHalfCpltCallback)(struct __UART_HandleTypeDef *huart);            /*!< UART Tx Half Complete Callback        */
+    void (*TxCpltCallback)(struct __UART_HandleTypeDef *huart);                /*!< UART Tx Complete Callback             */
+    void (*RxHalfCpltCallback)(struct __UART_HandleTypeDef *huart);            /*!< UART Rx Half Complete Callback        */
+    void (*RxCpltCallback)(struct __UART_HandleTypeDef *huart);                /*!< UART Rx Complete Callback             */
+    void (*ErrorCallback)(struct __UART_HandleTypeDef *huart);                 /*!< UART Error Callback                   */
+    void (*AbortCpltCallback)(struct __UART_HandleTypeDef *huart);             /*!< UART Abort Complete Callback          */
+    void (*AbortTransmitCpltCallback)(struct __UART_HandleTypeDef *huart);     /*!< UART Abort Transmit Complete Callback */
+    void (*AbortReceiveCpltCallback)(struct __UART_HandleTypeDef *huart);      /*!< UART Abort Receive Complete Callback  */
+    void (*WakeupCallback)(struct __UART_HandleTypeDef *huart);                /*!< UART Wakeup Callback                  */
+    void (*RxFifoFullCallback)(struct __UART_HandleTypeDef *huart);            /*!< UART Rx Fifo Full Callback            */
+    void (*TxFifoEmptyCallback)(struct __UART_HandleTypeDef *huart);           /*!< UART Tx Fifo Empty Callback           */
+    void (*RxEventCallback)(struct __UART_HandleTypeDef *huart, uint16_t Pos); /*!< UART Reception Event Callback     */
+    void (*MspInitCallback)(struct __UART_HandleTypeDef *huart);               /*!< UART Msp Init callback                */
+    void (*MspDeInitCallback)(struct __UART_HandleTypeDef *huart);             /*!< UART Msp DeInit callback              */
+} UART_HandleTypeDef;
+
 /**
  * @brief Get a UART instance
  *
@@ -180,8 +184,11 @@ typedef struct
 UART_Type *UART_GetInstance(uint32_t UARTNum);
 
 void UART_Init(void);
+void uart1_irq_handler(void);
 
-
+void putc(unsigned char c);
+void puts(char *str);
+unsigned char getc(void);
 
 
 
@@ -270,7 +277,14 @@ void BSP_UART_Transmit_DMA(UART_HandleTypeDef *huart, uint8_t *data, uint32_t le
  */
 void BSP_UART_Receive_DMA(UART_HandleTypeDef *huart, uint8_t *data, uint32_t len);
 
+void BSP_UART_IRQ_Handler(UART_HandleTypeDef *huart);
 void BSP_UART_Get_Flag(UART_HandleTypeDef *huart, uint32_t flag);
 void BSP_UART_Clear_Flag(UART_HandleTypeDef *huart, uint32_t flag);
+
+
+
+
+
+
 
 #endif /* __UART_H */

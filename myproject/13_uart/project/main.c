@@ -19,7 +19,9 @@ Copyright © zuozhongkai Co., Ltd. 1998-2019. All rights reserved.
 #include "bsp_int.h"
 #include "bsp_exit.h"
 #include "epit.h"
+#include "uart.h"
 #include "bsp_KeyFliter.h"
+
 
 
 /*
@@ -37,14 +39,18 @@ int main(void)
     led_init();      /* 初始化 led */
     beep_init();     /* 初始化 beep */
     KeyFiler_init(); /* 初始化按键带有10ms消抖无阻塞，外部中断+定时器消抖实现 */
+    UART_Init();     /* 初始化串口 */
+
 
     while (1) /* 死循环 */
     {
 
         // 指示系统启动完成
         led_on();   /* 打开 LED */
+        puts("Debug ...\r\n");
         delay_ms(200); /* 延时大约 200ms */
         led_off();  /* 关闭 LED */
+        puts("Debug complete\r\n");
         delay_ms(200); /* 延时大约 200ms */
 
     }
