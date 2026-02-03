@@ -2,6 +2,7 @@
 #define __UART_H
 
 #include "imx6ul.h"
+#include "stdio.h"
 
 /*UART_Config_Select*/
 #define UART_clksource_from_pll3_80M 0
@@ -186,14 +187,11 @@ UART_Type *UART_GetInstance(uint32_t UARTNum);
 void UART_Init(void);
 void uart1_irq_handler(void);
 
+
+int puts (const char *__s);
 void putc(unsigned char c);
-void puts(char *str);
-
-
-
-
-
-
+unsigned char getc(void);
+int raise(int sig);
 
 
 /**
