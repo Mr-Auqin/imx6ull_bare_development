@@ -127,6 +127,19 @@
             "cStandard": "c17",
             "cppStandard": "gnu++17",
             "intelliSenseMode": "linux-gcc-x64"
+        },
+        {
+            "name": "imx6ull_14_printf",
+            "includePath": [
+                "${workspaceFolder}/myproject/14_printf/**",
+                "${workspaceFolder}/myproject/14_printf/imx6ul"   
+                
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c17",
+            "cppStandard": "gnu++17",
+            "intelliSenseMode": "linux-gcc-x64"
         }
     ],
     "version": 4
