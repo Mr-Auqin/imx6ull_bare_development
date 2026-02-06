@@ -120,35 +120,77 @@ void eLCDIF_Init(void) {
     ---------像素时钟 51.2 MHz------*/
     //显示一帧图像需要的时钟为: (VSPW+VBP+LINE+VFP) * (HSPW + HBP + HOZVAL + HFP) =  (3 + 20 + 600 + 12) * (20 + 140 + 1024 + 160) = 853440
     //显示60帧图像需要的时钟为: 853440 * 60 = 51.2MHz,所以目标 pix_clk = 51.2MHz
-    //首先配置LCDIF1_CLK_ROOT的时钟为PLL5  pix_clk from LCDIF1_CLK_ROOT 因此将PLL5的时钟配置为51.2MHz
+    //首先配置LCDIF1_CLK_ROOT的时钟为PLL5  pix_clk from LCDIF1_CLK_ROOT 因此将LCDIF1_CLK_ROOT的时钟配置为51.2MHz
+    //LCDIF1_CLK_ROOT = PLL5/PRED/PODF = 768M/3/5 = 51.2MHZ
     SET_BIT(CCM->CSCDR2, CCM_CSCDR2_LCDIF1_PRE_CLK_SEL_MASK, CCM_CSCDR2_LCDIF1_PRE_CLK_SEL(2));//010 derive clock from PLL5
-    SET_BIT(CCM->CSCDR2, CCM_CSCDR2_LCDIF1_PRED_MASK, CCM_CSCDR2_LCDIF1_PRED(0));//Pre-divider for lcdif1 clock. 000 divide by 1
-    SET_BIT(CCM->CBCMR,  CCM_CBCMR_LCDIF1_PODF_MASK, CCM_CBCMR_LCDIF1_PODF(0));//Post-divider for LCDIF1 clock. 000 divide by 1
+    SET_BIT(CCM->CSCDR2, CCM_CSCDR2_LCDIF1_PRED_MASK, CCM_CSCDR2_LCDIF1_PRED(3-1));//Pre-divider for lcdif1 clock. 000 divide by 1
+    SET_BIT(CCM->CBCMR,  CCM_CBCMR_LCDIF1_PODF_MASK, CCM_CBCMR_LCDIF1_PODF(5-1));//Post-divider for LCDIF1 clock. 000 divide by 1
     SET_BIT(CCM->CSCDR2, CCM_CSCDR2_LCDIF1_CLK_SEL_MASK, CCM_CSCDR2_LCDIF1_CLK_SEL(0));//000 derive clock from divided pre-muxed LCDIF1 clock
 
     // 配置PLL5(Video PLL)的时钟(reference manual(IMX6ULL):18.5.1.3.4 Audio / Video PLL)
     // The output frequency can be set by programming the fields
     // in the CCM_ANALOG_PLL_AUDIO, CCM_ANALOG_PLL_VIDEO, and
     // CCM_ANALOG_MISC2 register sets according to the following equation
-    // PLL output frequency = Fref * (DIV_SELECT + NUM/DENOM) = 24*()
+    // PLL output frequency = Fref * (DIV_SELECT + NUM/DENOM) 
+    //                      = 24*(32+0)= 768MHz
     
-    SET_BIT(CCM_ANALOG->PLL_VIDEO, CCM_ANALOG_PLL_AUDIO_POST_DIV_SELECT_MASK, CCM_ANALOG_PLL_AUDIO_POST_DIV_SELECT(2));//10 — Divide by 1
+    SET_BIT(CCM_ANALOG->PLL_VIDEO, CCM_ANALOG_PLL_VIDEO_POST_DIV_SELECT_MASK, CCM_ANALOG_PLL_VIDEO_POST_DIV_SELECT(2));//10 — Divide by 1
     /**DEBUG:上电默认是1:旁路Video PLL,我这里取消旁路**/
-    SET_BIT(CCM_ANALOG->PLL_VIDEO, CCM_ANALOG_PLL_AUDIO_BYPASS_CLK_SRC_MASK, CCM_ANALOG_PLL_AUDIO_BYPASS_CLK_SRC(0));//0 — Don't Bypass the PLL
-    SET_BIT(CCM_ANALOG->PLL_VIDEO, CCM_ANALOG_PLL_AUDIO_ENABLE_MASK, CCM_ANALOG_PLL_AUDIO_ENABLE(1));//1 — Enalbe PLL output
+    SET_BIT(CCM_ANALOG->PLL_VIDEO, CCM_ANALOG_PLL_VIDEO_BYPASS_CLK_SRC_MASK, CCM_ANALOG_PLL_VIDEO_BYPASS_CLK_SRC(0));//0 — Don't Bypass the PLL
+    SET_BIT(CCM_ANALOG->PLL_VIDEO, CCM_ANALOG_PLL_VIDEO_ENABLE_MASK, CCM_ANALOG_PLL_VIDEO_ENABLE(1));//1 — Enalbe PLL output
     /**DEBUG:上电默认是1:Powers down the PLL.**/
-    SET_BIT(CCM_ANALOG->PLL_VIDEO, CCM_ANALOG_PLL_AUDIO_POWERDOWN_MASK, CCM_ANALOG_PLL_AUDIO_POWERDOWN(0));//0 — Don't Powers down the PLL.
-    SET_BIT(CCM_ANALOG->PLL_VIDEO, CCM_ANALOG_PLL_AUDIO_DIV_SELECT_MASK, CCM_ANALOG_PLL_AUDIO_DIV_SELECT(27));// Valid range for DIV_SELECT divider value: 27~54.
+    SET_BIT(CCM_ANALOG->PLL_VIDEO, CCM_ANALOG_PLL_VIDEO_POWERDOWN_MASK, CCM_ANALOG_PLL_VIDEO_POWERDOWN(0));//0 — Don't Powers down the PLL.
+    SET_BIT(CCM_ANALOG->PLL_VIDEO, CCM_ANALOG_PLL_VIDEO_DIV_SELECT_MASK, CCM_ANALOG_PLL_VIDEO_DIV_SELECT(32));// Valid range for DIV_SELECT divider value: 27~54.
 
     SET_BIT(CCM_ANALOG->MISC2, CCM_ANALOG_MISC2_VIDEO_DIV_MASK, CCM_ANALOG_MISC2_VIDEO_DIV(0));// 00 divide by 1 (Default)
 
-    //还有NUM/DENOM 没有配置 明天再配置
+    //配置NUM & DENOM  = NUM/DENOM = 0/1 = 0;
+    SET_BIT(CCM_ANALOG->PLL_VIDEO_NUM, CCM_ANALOG_PLL_VIDEO_NUM_A_MASK, CCM_ANALOG_PLL_VIDEO_NUM_A(0));// Absolute value should be less than denominator
+    SET_BIT(CCM_ANALOG->PLL_VIDEO_DENOM, CCM_ANALOG_PLL_VIDEO_DENOM_B_MASK, CCM_ANALOG_PLL_VIDEO_DENOM_B(1));// denominator
 
-    
     //3. Start the BUS CLOCK (apb_clk) and set the appropriate frequency by programmingthe registers in CCM.
+    //apb_clk from AXI_CLK_ROOT = 540MHz/3 = 180MHz  Tips: AXI_CLK_ROOT  Maximum Frequency (MHz) = 264MHz
+    SET_BIT(CCM->CBCDR, CCM_CBCDR_AXI_ALT_SEL_MASK, CCM_CBCDR_AXI_ALT_SEL(1));//1 PLL3_PFD1(540MHz) will be selected as alternative clock for AXI root clock
+    SET_BIT(CCM->CBCDR, CCM_CBCDR_AXI_SEL_MASK, CCM_CBCDR_AXI_SEL(1));//1 AXI alternative clock will be used as AXI clock root
+    SET_BIT(CCM->CBCDR, CCM_CBCDR_AXI_PODF_MASK, CCM_CBCDR_AXI_PODF(3-1));//010 divide by 3
 
+    //4. Bring the eLCDIF out of soft reset and disable the clock gate bit.
+    SET_BIT(LCDIF->CTRL, LCDIF_CTRL_CLKGATE_MASK, LCDIF_CTRL_CLKGATE(0));//must be set to zero for normal operation disable the clock gate bit.
+    SET_BIT(LCDIF->CTRL, LCDIF_CTRL_SFTRST_MASK, LCDIF_CTRL_SFTRST(0));// must be set to zero to enable normal operation When set to one, it forces a block level reset
+ 
+    //5. Reset the LCD controller by setting LCDIF_CTRL1[RESET] bit appropriately
+    //外设LCD控制器 没有复位信号 不设置
 
+    //6. Make sure LCDIF_CTRL[READ_WRITEB] bit is 0.
+    SET_BIT(LCDIF->CTRL, LCDIF_CTRL_READ_WRITEB_MASK, LCDIF_CTRL_READ_WRITEB(0));
 
+    //7. Select the transfer mode of operation Set LCDIF_CTRL[MASTER] bit to 1
+    SET_BIT(LCDIF->CTRL, LCDIF_CTRL_MASTER_MASK, LCDIF_CTRL_MASTER(1));//Set this bit to make the eLCDIF act as a bus master.
+
+    // 8. Set the LCDIF_CTRL[INPUT_DATA_SWIZZLE] according to the endianness of
+    // the LCD controller. Also, set the LCDIF_CTRL[DATA_SHIFT_DIR] and
+    // LCDIF_CTRL[SHIFT_NUM_BITS] if it is required to shift the data left or right
+    // before it is output.
+    SET_BIT(LCDIF->CTRL, LCDIF_CTRL_INPUT_DATA_SWIZZLE_MASK, LCDIF_CTRL_INPUT_DATA_SWIZZLE(0));//0x0 NO_SWAP — No byte swapping.(Little endian)
+    //这里不需要将数据进行左右移动,因此就不设置LCDIF_CTRL[DATA_SHIFT_DIR] and LCDIF_CTRL[SHIFT_NUM_BITS]了。
+
+    // 9. Set the LCDIF_CTRL[WORD_LENGTH] field appropriately: 0 = 16-bit input, 1 =
+    // 8-bit input, 2 = 18-bit input, 3 = 24/32-bit input. Also, select the correct 16/18/24 bit
+    // data format with the corresponding fields in LCDIF_CTRL register
+    SET_BIT(LCDIF->CTRL, LCDIF_CTRL_WORD_LENGTH_MASK, LCDIF_CTRL_WORD_LENGTH(3));//0x3 24_BIT — Input data is 24 bits per pixel.
+    SET_BIT(LCDIF->CTRL, LCDIF_CTRL_BYPASS_COUNT_MASK, LCDIF_CTRL_BYPASS_COUNT(1));//This bit must be 1 in DOTCLK and DVI modes of operation.
+    SET_BIT(LCDIF->CTRL, LCDIF_CTRL_DOTCLK_MODE_MASK, LCDIF_CTRL_DOTCLK_MODE(1));//Set this bit to 1 to make the hardware go into the DOTCLK mode
+    
+    SET_BIT(LCDIF->CTRL, LCDIF_CTRL_DATA_FORMAT_24_BIT_MASK, LCDIF_CTRL_DATA_FORMAT_24_BIT(0));//Data input to the block is in 24 bpp format
+
+    // 10. Set the LCDIF_CTRL1[BYTE_PACKING_FORMAT] field according to the input frame.
+    SET_BIT(LCDIF->CTRL1, LCDIF_CTRL1_BYTE_PACKING_FORMAT_MASK, LCDIF_CTRL1_BYTE_PACKING_FORMAT(0x7));//set the bit field value to 0x7 if the display data is arranged in the 24-bit unpacked format
+
+    // 11. Set the LCDIF_CTRL[LCD_DATABUS_WIDTH] appropriately: 0 = 16-bit output,1 = 8-bit output, 2 = 18-bit output, 3 = 24/32-bit output.
+    SET_BIT(LCDIF->CTRL, LCDIF_CTRL_LCD_DATABUS_WIDTH_MASK, LCDIF_CTRL_LCD_DATABUS_WIDTH(3));//0x3 24_BIT — 24-bit data bus mode
+
+    //12. Enable the necessary IRQs.
+    //这里暂时没有中断需要使能,如果有对应的需要测试使用的中断,后面在此编写测试
 
 
 }

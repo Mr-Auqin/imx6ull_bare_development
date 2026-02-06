@@ -140,6 +140,19 @@
             "cStandard": "c17",
             "cppStandard": "gnu++17",
             "intelliSenseMode": "linux-gcc-x64"
+        },
+        {
+            "name": "imx6ull_15_eLCDIF",
+            "includePath": [
+                "${workspaceFolder}/myproject/15_eLCDIF/**",
+                "${workspaceFolder}/myproject/15_eLCDIF/imx6ul"   
+                
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c17",
+            "cppStandard": "gnu++17",
+            "intelliSenseMode": "linux-gcc-x64"
         }
     ],
     "version": 4

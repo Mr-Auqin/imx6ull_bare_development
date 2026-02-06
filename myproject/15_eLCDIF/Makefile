@@ -21,7 +21,8 @@ INCDIRS := imx6ul\
 		   bsp/epit\
 		   bsp/KeyFilter\
 		   bsp/gpt\
-		   bsp/uart
+		   bsp/uart\
+		   bsp/eLCDIF
 
 SRCDIRS := project\
 		   stdio/lib\
@@ -36,7 +37,8 @@ SRCDIRS := project\
 		   bsp/epit\
 		   bsp/KeyFilter\
 		   bsp/gpt\
-		   bsp/uart
+		   bsp/uart\
+		   bsp/eLCDIF
 
 INCLUDES := $(patsubst %,-I %,$(INCDIRS))
 
