@@ -1,0 +1,19 @@
+{
+    "configurations": [
+        {
+            "name": "1_chrdevbase",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "/home/auqin/linux/linux-imx-rel_imx_4.1.15_2.1.0_ga/include",
+                "/home/auqin/linux/linux-imx-rel_imx_4.1.15_2.1.0_ga/arch/arm/include",
+                "/home/auqin/linux/linux-imx-rel_imx_4.1.15_2.1.0_ga/arch/arm/include/generated"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/local/arm/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc",
+            "cStandard": "c17",
+            "cppStandard": "gnu++17",
+            "intelliSenseMode": "linux-gcc-arm"
+        }
+    ],
+    "version": 4
+}

@@ -21,7 +21,7 @@ fi
 
 #补充目录检查
 if [ ! -f "Makefile" ];then
-	echo -e "\033[31m错误：未找到交叉编译器 ${CROSS_COMPILE}gcc\033[0m"
+	echo -e "\033[31m错误：请在uboot的顶层目录运行此脚本！\033[0m"
 	exit 1
 fi
 
