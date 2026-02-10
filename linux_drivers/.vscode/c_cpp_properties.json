@@ -1,0 +1,41 @@
+{
+    "configurations": [
+        {
+            "name": "1_chrdevbase_Home",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "/home/auqin/linux/linux-imx-rel_imx_4.1.15_2.1.0_ga/include",
+                "/home/auqin/linux/linux-imx-rel_imx_4.1.15_2.1.0_ga/arch/arm/include",
+                "/home/auqin/linux/linux-imx-rel_imx_4.1.15_2.1.0_ga/arch/arm/include/generated"
+            ],
+            "defines": [
+                "__KERNEL__",  // 关键！告诉插件这是内核代码，识别__init宏
+                "MODULE",      // 内核模块宏
+                "CONFIG_ARM"   // ARM架构宏
+            ],
+            "compilerPath": "/usr/local/arm/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc",
+            "cStandard": "c17",
+            "cppStandard": "gnu++17",
+            "intelliSenseMode": "linux-gcc-arm"
+        },
+        {
+            "name": "1_chrdevbase_Company",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "/home/book/linux/linux-imx-rel_imx_4.1.15_2.1.0_ga/include",
+                "/home/book/linux/linux-imx-rel_imx_4.1.15_2.1.0_ga/arch/arm/include",
+                "/home/book/linux/linux-imx-rel_imx_4.1.15_2.1.0_ga/arch/arm/include/generated"
+            ],
+            "defines": [
+                "__KERNEL__",  // 关键！告诉插件这是内核代码，识别__init宏
+                "MODULE",      // 内核模块宏
+                "CONFIG_ARM"   // ARM架构宏
+            ],
+            "compilerPath": "/usr/local/arm/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-gcc",
+            "cStandard": "c17",
+            "cppStandard": "gnu++17",
+            "intelliSenseMode": "linux-gcc-arm"
+        }
+    ],
+    "version": 4
+}
