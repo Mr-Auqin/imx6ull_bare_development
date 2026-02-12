@@ -16,28 +16,15 @@ static int chrdevbase_release(struct inode *inode, struct file *filp);
 static ssize_t chrdevbase_read(struct file *filp, char __user *buf, size_t cnt, loff_t *offt);
 static ssize_t chrdevbase_write(struct file *filp, const char __user *buf, size_t cnt, loff_t *offt);
 
-//申明设备号释放回调函数（devm绑定后自动执行）
-static void devm_chrdev_region_release(void *data);
-//申明cdev自动释放回调函数（核心：devm_资源管理）
-static void devm_cdev_release(void *data);
-//申明class自动释放回调函数（核心：devm_资源管理）
-static void devm_class_release(void *data);
-//申明设备节点自动释放回调函数（核心：devm_资源管理）
-static void devm_device_release(void *data);
-
 
 
 //定义核心变量
 #define CHRDEVBASE_NAME  "chrdevbase" // 设备名
+#define CHRDEVBASE_MAJOR  2048        /* 主设备号（手动指定，避免动态分配） */
 
 static char readbuf[100];      // 驱动层读缓冲区
 static char writebuf[100];     // 驱动层写缓冲区
-static char kerneldata[] = "kernel data!"; // 驱动默认数据
-
-static dev_t devid;            // 设备号（主+次）
-static struct cdev chrdevbase_cdev;
-static struct class *chrdevbase_class;
-static struct device *chrdevbase_device;
+static char kerneldata[100] = "kernel data!"; // 驱动默认数据
 
 
 //定义文件操作集（核心：绑定字符驱动函数）
@@ -116,8 +103,13 @@ static ssize_t chrdevbase_read(struct file *filp, char __user *buf, size_t cnt, 
 static ssize_t chrdevbase_write(struct file *filp, const char __user *buf, size_t cnt, loff_t *offt)
 {
     int retvalue = 0;
+
+    //writebuf缓冲区clear
+    memset(writebuf, 0, sizeof(writebuf));
     // 接收用户层传递过来的数据（核心API：copy_from_user）
     retvalue = copy_from_user(writebuf, buf, cnt);//返回值为未成功拷贝的字节数（成功时返回0）
+    //写缓冲区的数据传递给内核数据
+    memcpy(kerneldata, writebuf, sizeof(writebuf));
     if(retvalue == 0){
         printk("chrdevbase write success! data: %s\n", writebuf);
     }else{
@@ -137,131 +129,21 @@ static int __init chrdevbase_init(void)
     memset(readbuf, 0, sizeof(readbuf));
     memset(writebuf, 0, sizeof(writebuf));
 
-    /********************* 第二步：动态分配设备号（devm_版） *********************/
-    // devm_alloc_chrdev_region：自动释放设备号，失败直接返回
-    // ret = devm_alloc_chrdev_region(&devid, 0, 1, CHRDEVBASE_NAME);
-    // if (ret < 0) {
-    //     printk(KERN_ERR "chrdevbase: 设备号分配失败: %d\n", ret);
-    //     return ret; // 失败直接返回，内核自动释放已申请的devm资源
-    // }
-
-    // 1. 传统分配设备号（4.1.15内核一定支持）
-    ret = alloc_chrdev_region(&devid, 0, 1, CHRDEVBASE_NAME);
+    /********************* 第二步：注册字符设备 *********************/
+    /* 1. 注册字符设备（手动指定主设备号，避免动态分配） */
+    ret = register_chrdev(CHRDEVBASE_MAJOR, CHRDEVBASE_NAME, &chrdevbase_fops);
     if (ret < 0) {
-        printk(KERN_ERR "chrdevbase: 设备号分配失败: %d\n", ret);
+        printk(KERN_ERR "chrdevbase: 注册字符设备失败！\n");
         return ret;
     }
+    printk(KERN_INFO "chrdevbase: 驱动加载成功！主设备号：%d\n", CHRDEVBASE_MAJOR);
+    return 0;
 
-    // 2. 用devm_add_action绑定释放回调，实现自动释放（等效devm_alloc_chrdev_region）
-    ret = devm_add_action(NULL, devm_chrdev_region_release, &devid);
-    if (ret < 0) {
-        printk(KERN_ERR "chrdevbase: 绑定设备号释放回调失败: %d\n", ret);
-        unregister_chrdev_region(devid, 1); // 手动回滚，避免泄漏
-        return ret;
-    }
-
-    /********************* 第三步：初始化+注册cdev（devm_版） *********************/
-    // 1. 初始化cdev
-    cdev_init(&chrdevbase_cdev, &chrdevbase_fops);
-    chrdevbase_cdev.owner = THIS_MODULE;
-
-    // 2. devm_cdev_add：自动释放cdev，失败直接返回,4.1.15以后可以用devm_cdev_init  devm_cdev_add替代cdev_init+cdev_add
-    // ret = devm_cdev_add(&chrdevbase_cdev.dev, &chrdevbase_cdev, devid, 1);
-    // if (ret < 0) {
-    //     printk(KERN_ERR "chrdevbase: cdev注册失败: %d\n", ret);
-    //     return ret; // 无需手动del cdev，devm自动释放
-    // }
-
-    //传统cdev_add（4.1.15内核只能用这个）
-    ret = cdev_add(&chrdevbase_cdev, devid, 1);
-    if (ret < 0) {
-        printk(KERN_ERR "chrdevbase: cdev注册失败: %d\n", ret);
-        unregister_chrdev_region(devid, 1); // 手动释放，避免泄漏
-        return ret;
-    }
-
-    //用devm_add_action绑定释放回调，实现自动释放（模拟devm_cdev_add）
-    ret = devm_add_action(NULL, devm_cdev_release, &chrdevbase_cdev);
-    if (ret < 0) {
-        printk(KERN_ERR "chrdevbase: 绑定cdev释放回调失败: %d\n", ret);
-        cdev_del(&chrdevbase_cdev); // 手动释放，避免泄漏
-        unregister_chrdev_region(devid, 1);
-        return ret;
-    }
-
-    /********************* 第四步：创建设备类+设备节点（devm_版） *********************/
-    // 1. devm_class_create：自动销毁设备类
-    // chrdevbase_class = devm_class_create(THIS_MODULE, CHRDEVBASE_NAME);
-    // if (IS_ERR(chrdevbase_class)) {
-    //     ret = PTR_ERR(chrdevbase_class);
-    //     printk(KERN_ERR "chrdevbase: 设备类创建失败: %d\n", ret);
-    //     return ret; // 无需手动destroy class，devm自动释放
-    // }
-
-    //传统创建设备类
-    chrdevbase_class = class_create(THIS_MODULE, CHRDEVBASE_NAME);
-    if (IS_ERR(chrdevbase_class))
-    {
-        ret = PTR_ERR(chrdevbase_class);
-        printk(KERN_ERR "chrdevbase: 设备类创建失败: %d\n", ret);
-        // 回滚已申请的资源（设备号/cdev）
-        cdev_del(&chrdevbase_cdev);
-        unregister_chrdev_region(devid, 1);
-        return ret;
-    }
-
-    //绑定设备类释放回调（devm自动销毁）
-    ret = devm_add_action(NULL, devm_class_release, chrdevbase_class);
-    if (ret < 0)
-    {
-        printk(KERN_ERR "chrdevbase: 绑定设备类释放回调失败: %d\n", ret);
-        // 手动回滚
-        class_destroy(chrdevbase_class);
-        cdev_del(&chrdevbase_cdev);
-        unregister_chrdev_region(devid, 1);
-        return ret;
-    }
-
-    // 2. devm_device_create：自动销毁设备节点
-    // dev = devm_device_create(chrdevbase_class, NULL, devid, NULL, CHRDEVBASE_NAME);
-    // if (IS_ERR(dev)) {
-    //     ret = PTR_ERR(dev);
-    //     printk(KERN_ERR "chrdevbase: 设备节点创建失败: %d\n", ret);
-    //     return ret; // 无需手动destroy device，devm自动释放
-    // }
-
-    //传统创建设备节点
-    chrdevbase_device = device_create(chrdevbase_class, NULL, devid, NULL, CHRDEVBASE_NAME);
-    if (IS_ERR(chrdevbase_device))
-    {
-        ret = PTR_ERR(chrdevbase_device);
-        printk(KERN_ERR "chrdevbase: 设备节点创建失败: %d\n", ret);
-        // 回滚已申请的资源
-        class_destroy(chrdevbase_class);
-        cdev_del(&chrdevbase_cdev);
-        unregister_chrdev_region(devid, 1);
-        return ret;
-    }
-
-    //绑定设备节点释放回调（devm自动销毁）
-    ret = devm_add_action(NULL, devm_device_release, chrdevbase_device);
-    if (ret < 0)
-    {
-        printk(KERN_ERR "chrdevbase: 绑定设备节点释放回调失败: %d\n", ret);
-        // 手动回滚
-        device_destroy(chrdevbase_class, devid);
-        class_destroy(chrdevbase_class);
-        unregister_chrdev_region(devid, 1);
-        cdev_del(&chrdevbase_cdev);
-        return ret;
-    }
-
-    /********************* 第五步：硬件初始化（devm_版示例，虚拟驱动可省） *********************/
+    /********************* 第三步：硬件初始化（devm_版示例，虚拟驱动可省） *********************/
     // 若有GPIO：用devm_gpio_request替代gpio_request，自动释放
     // ret = devm_gpio_request(&chrdevbase_cdev.dev, LED_GPIO, "led");
     // if (ret < 0) { printk("GPIO申请失败"); return ret; }
 
-    printk(KERN_INFO "chrdevbase: 驱动加载成功！\n");
     return 0; // 成功返回，所有devm资源由内核托管
 }
 
@@ -269,42 +151,10 @@ static int __init chrdevbase_init(void)
 static void __exit chrdevbase_exit(void)
 {
     // 只需打印日志，所有devm资源（设备号/cdev/类/节点）由内核自动释放
+    unregister_chrdev(CHRDEVBASE_MAJOR, CHRDEVBASE_NAME);
     printk(KERN_INFO "chrdevbase: 驱动卸载成功！\n");
 }
 
-
-//设备号释放回调函数（devm绑定后自动执行）
-static void devm_chrdev_region_release(void *data)
-{
-    dev_t *devid = data;
-    unregister_chrdev_region(*devid, 1); // 卸载时自动释放设备号
-    printk(KERN_INFO "chrdevbase: 设备号自动释放成功!\n");
-}
-
-//定义cdev释放回调函数（devm_add_action会绑定这个函数）
-static void devm_cdev_release(void *data)
-{
-    struct cdev *cdev = data;
-    cdev_del(cdev); // 卸载驱动时自动执行cdev_del
-    printk(KERN_INFO "chrdevbase: cdev自动释放成功!\n");
-}
-
-
-//设备类释放回调（对应class_destroy）
-static void devm_class_release(void *data)
-{
-    struct class *cls = data;
-    class_destroy(cls);
-    printk(KERN_INFO "chrdevbase: 设备类自动释放成功!\n");
-}
-
-//设备节点释放回调（对应device_destroy）
-static void devm_device_release(void *data)
-{
-    struct device *dev = data;
-    device_destroy(dev->class, dev->devt); // 按类+设备号销毁
-    printk(KERN_INFO "chrdevbase: 设备节点自动释放成功!\n");
-}
 
 //模块入口/出口宏（内核规范）
 module_init(chrdevbase_init); // 核心宏：注册驱动入口函数，insmod时内核自动执行该函数

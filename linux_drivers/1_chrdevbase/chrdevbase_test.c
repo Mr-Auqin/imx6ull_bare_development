@@ -4,87 +4,87 @@
 #include <string.h>
 #include <errno.h>
 
-// Éè±¸½ÚµãÂ·¾¶(ºÍÇı¶¯ÖĞCHRDEVBASE_NAMEÒ»ÖÂ)
+// è®¾å¤‡èŠ‚ç‚¹è·¯å¾„(å’Œé©±åŠ¨ä¸­CHRDEVBASE_NAMEä¸€è‡´)
 #define CHRDEVBASE_DEV "/dev/chrdevbase"
 
 /*
- * @description : Ö÷º¯Êı,²âÊÔ×Ö·ûÇı¶¯µÄ¶ÁĞ´¹¦ÄÜ
- * @param - argc : ²ÎÊı¸öÊı
- * @param - argv : ²ÎÊıÁĞ±í,Ö§³ÖÁ½ÖÖÓÃ·¨£º
- *                1. ./chrdevbase_test read £º¶ÁÈ¡Çı¶¯Êı¾İ
- *                2. ./chrdevbase_test write "²âÊÔÊı¾İ" £ºÏòÇı¶¯Ğ´ÈëÊı¾İ
- * @return : 0 ³É¹¦;ÆäËû Ê§°Ü
+ * @description : ä¸»å‡½æ•°,æµ‹è¯•å­—ç¬¦é©±åŠ¨çš„è¯»å†™åŠŸèƒ½
+ * @param - argc : å‚æ•°ä¸ªæ•°
+ * @param - argv : å‚æ•°åˆ—è¡¨,æ”¯æŒä¸¤ç§ç”¨æ³•ï¼š
+ *                1. ./chrdevbase_test read ï¼šè¯»å–é©±åŠ¨æ•°æ®
+ *                2. ./chrdevbase_test write "æµ‹è¯•æ•°æ®" ï¼šå‘é©±åŠ¨å†™å…¥æ•°æ®
+ * @return : 0 æˆåŠŸ;å…¶ä»– å¤±è´¥
  */
 int main(int argc, char *argv[])
 {
     int fd, retvalue;
     char readbuf[100], writebuf[100];
     
-    // ========== µÚÒ»²½£º²ÎÊıĞ£Ñé ==========
+    // ========== ç¬¬ä¸€æ­¥ï¼šå‚æ•°æ ¡éªŒ ==========
     if(argc < 2){
         printf("Usage:\n");
-        printf("  %s read        - ¶ÁÈ¡Çı¶¯Êı¾İ\n", argv[0]);
-        printf("  %s write <data> - ÏòÇı¶¯Ğ´ÈëÊı¾İ\n", argv[0]);
+        printf("  %s read        - è¯»å–é©±åŠ¨æ•°æ®\n", argv[0]);
+        printf("  %s write <data> - å‘é©±åŠ¨å†™å…¥æ•°æ®\n", argv[0]);
         return -1;
     }
 
-    // ========== µÚ¶ş²½£º´ò¿ªÉè±¸½Úµã ==========
-    fd = open(CHRDEVBASE_DEV, O_RDWR); // ÒÔ¶ÁĞ´Ä£Ê½´ò¿ª
+    // ========== ç¬¬äºŒæ­¥ï¼šæ‰“å¼€è®¾å¤‡èŠ‚ç‚¹ ==========
+    fd = open(CHRDEVBASE_DEV, O_RDWR); // ä»¥è¯»å†™æ¨¡å¼æ‰“å¼€
     if(fd < 0){
-        // ´ø´íÎóÂë´òÓ¡,·½±ãµ÷ÊÔ
-        printf("´ò¿ªÉè±¸Ê§°Ü!errno=%d, errmsg=%s\n", errno, strerror(errno));
+        // å¸¦é”™è¯¯ç æ‰“å°,æ–¹ä¾¿è°ƒè¯•
+        printf("æ‰“å¼€è®¾å¤‡å¤±è´¥!errno=%d, errmsg=%s\n", errno, strerror(errno));
         return -1;
     }
-    printf("³É¹¦´ò¿ªÉè±¸£º%s(fd=%d)\n", CHRDEVBASE_DEV, fd);
+    printf("æˆåŠŸæ‰“å¼€è®¾å¤‡ï¼š%s(fd=%d)\n", CHRDEVBASE_DEV, fd);
 
-    // ========== µÚÈı²½£º¸ù¾İ²ÎÊıÖ´ĞĞ¶ÁĞ´²Ù×÷ ==========
-    // ¶ÁÈ¡Çı¶¯Êı¾İ
+    // ========== ç¬¬ä¸‰æ­¥ï¼šæ ¹æ®å‚æ•°æ‰§è¡Œè¯»å†™æ“ä½œ ==========
+    // è¯»å–é©±åŠ¨æ•°æ®
     if(strcmp(argv[1], "read") == 0){
-        // ³õÊ¼»¯»º³åÇø,±ÜÃâÔàÊı¾İ
+        // åˆå§‹åŒ–ç¼“å†²åŒº,é¿å…è„æ•°æ®
         memset(readbuf, 0, sizeof(readbuf));
-        // ´ÓÇı¶¯¶ÁÈ¡Êı¾İ(×î¶à¶ÁÈ¡100×Ö½Ú)
+        // ä»é©±åŠ¨è¯»å–æ•°æ®(æœ€å¤šè¯»å–100å­—èŠ‚)
         retvalue = read(fd, readbuf, sizeof(readbuf));
         if(retvalue < 0){
-            printf("¶ÁÈ¡Éè±¸Ê§°Ü!errno=%d, errmsg=%s\n", errno, strerror(errno));
+            printf("è¯»å–è®¾å¤‡å¤±è´¥!errno=%d, errmsg=%s\n", errno, strerror(errno));
             close(fd);
             return -1;
         }
-        printf("¶ÁÈ¡³É¹¦!¶ÁÈ¡×Ö½ÚÊı£º%d,Êı¾İ£º%s\n", retvalue, readbuf);
+        printf("è¯»å–æˆåŠŸ!è¯»å–å­—èŠ‚æ•°ï¼š%d,æ•°æ®ï¼š%s\n", retvalue, readbuf);
     }
 
-    // ÏòÇı¶¯Ğ´ÈëÊı¾İ
+    // å‘é©±åŠ¨å†™å…¥æ•°æ®
     else if(strcmp(argv[1], "write") == 0){
         if(argc < 3){
-            printf("Ğ´ÈëÊ§°Ü!ÇëÖ¸¶¨ÒªĞ´ÈëµÄÊı¾İ,ÀıÈç£º%s write \"hello driver\"\n", argv[0]);
+            printf("å†™å…¥å¤±è´¥!è¯·æŒ‡å®šè¦å†™å…¥çš„æ•°æ®,ä¾‹å¦‚ï¼š%s write \"hello driver\"\n", argv[0]);
             close(fd);
             return -1;
         }
-        // ¿½±´ÒªĞ´ÈëµÄÊı¾İµ½»º³åÇø
-        strncpy(writebuf, argv[2], sizeof(writebuf)-1); // Áô1×Ö½Ú´æ'\0'
-        // ÏòÇı¶¯Ğ´ÈëÊı¾İ
+        // æ‹·è´è¦å†™å…¥çš„æ•°æ®åˆ°ç¼“å†²åŒº
+        strncpy(writebuf, argv[2], sizeof(writebuf)-1); // ç•™1å­—èŠ‚å­˜'\0'
+        // å‘é©±åŠ¨å†™å…¥æ•°æ®
         retvalue = write(fd, writebuf, strlen(writebuf));
         if(retvalue < 0){
-            printf("Ğ´ÈëÉè±¸Ê§°Ü!errno=%d, errmsg=%s\n", errno, strerror(errno));
+            printf("å†™å…¥è®¾å¤‡å¤±è´¥!errno=%d, errmsg=%s\n", errno, strerror(errno));
             close(fd);
             return -1;
         }
-        printf("Ğ´Èë³É¹¦!Ğ´Èë×Ö½ÚÊı£º%d,Êı¾İ£º%s\n", retvalue, writebuf);
+        printf("å†™å…¥æˆåŠŸ!å†™å…¥å­—èŠ‚æ•°ï¼š%d,æ•°æ®ï¼š%s\n", retvalue, writebuf);
     }
 
-    // ÎŞĞ§²ÎÊı
+    // æ— æ•ˆå‚æ•°
     else{
-        printf("ÎŞĞ§²ÎÊı!½öÖ§³Ö read/write ²Ù×÷\n");
+        printf("æ— æ•ˆå‚æ•°!ä»…æ”¯æŒ read/write æ“ä½œ\n");
         close(fd);
         return -1;
     }
 
-    // ========== µÚËÄ²½£º¹Ø±ÕÉè±¸ ==========
+    // ========== ç¬¬å››æ­¥ï¼šå…³é—­è®¾å¤‡ ==========
     retvalue = close(fd);
     if(retvalue < 0){
-        printf("¹Ø±ÕÉè±¸Ê§°Ü!errno=%d, errmsg=%s\n", errno, strerror(errno));
+        printf("å…³é—­è®¾å¤‡å¤±è´¥!errno=%d, errmsg=%s\n", errno, strerror(errno));
         return -1;
     }
-    printf("³É¹¦¹Ø±ÕÉè±¸\n");
+    printf("æˆåŠŸå…³é—­è®¾å¤‡\n");
 
     return 0;
 }
