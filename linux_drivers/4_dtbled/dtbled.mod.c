@@ -18,14 +18,22 @@ static const struct modversion_info ____versions[]
 __used
 __attribute__((section("__versions"))) = {
 	{ 0xfa985410, __VMLINUX_SYMBOL_STR(module_layout) },
-	{ 0x6bc3fbc0, __VMLINUX_SYMBOL_STR(__unregister_chrdev) },
-	{ 0x34fbc3de, __VMLINUX_SYMBOL_STR(__register_chrdev) },
-	{ 0x67c2fa54, __VMLINUX_SYMBOL_STR(__copy_to_user) },
+	{ 0xb37da9a1, __VMLINUX_SYMBOL_STR(cdev_del) },
+	{ 0x7485e15e, __VMLINUX_SYMBOL_STR(unregister_chrdev_region) },
+	{ 0xc2165d85, __VMLINUX_SYMBOL_STR(__arm_iounmap) },
+	{ 0xfeb25d8b, __VMLINUX_SYMBOL_STR(cdev_add) },
+	{ 0xb6828306, __VMLINUX_SYMBOL_STR(cdev_init) },
+	{ 0x3454b3ee, __VMLINUX_SYMBOL_STR(of_iomap) },
+	{ 0x29537c9e, __VMLINUX_SYMBOL_STR(alloc_chrdev_region) },
+	{ 0xae372752, __VMLINUX_SYMBOL_STR(of_property_read_u32_array) },
+	{ 0x18e87da3, __VMLINUX_SYMBOL_STR(of_find_property) },
+	{ 0xfbed6f8c, __VMLINUX_SYMBOL_STR(of_find_node_opts_by_path) },
+	{ 0x5f754e5a, __VMLINUX_SYMBOL_STR(memset) },
+	{ 0x5dcf6341, __VMLINUX_SYMBOL_STR(outer_cache) },
 	{ 0xfbc74f64, __VMLINUX_SYMBOL_STR(__copy_from_user) },
-	{ 0x9d669763, __VMLINUX_SYMBOL_STR(memcpy) },
+	{ 0x27e1a049, __VMLINUX_SYMBOL_STR(printk) },
 	{ 0xfa2a45e, __VMLINUX_SYMBOL_STR(__memzero) },
 	{ 0xefd6cf06, __VMLINUX_SYMBOL_STR(__aeabi_unwind_cpp_pr0) },
-	{ 0x27e1a049, __VMLINUX_SYMBOL_STR(printk) },
 };
 
 static const char __module_depends[]
@@ -34,4 +42,4 @@ __attribute__((section(".modinfo"))) =
 "depends=";
 
 
-MODULE_INFO(srcversion, "56EF67C236996839CBE70D2");
+MODULE_INFO(srcversion, "D70E92F05D225F95A7F382E");

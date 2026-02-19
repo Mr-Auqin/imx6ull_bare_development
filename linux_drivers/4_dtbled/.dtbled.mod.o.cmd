@@ -1,8 +1,9 @@
-cmd_/home/auqin/imax6ull_bare_development/linux_drivers/1_chrdevbase/chrdevbase.o := arm-linux-gnueabihf-gcc -Wp,-MD,/home/auqin/imax6ull_bare_development/linux_drivers/1_chrdevbase/.chrdevbase.o.d -nostdinc -isystem /usr/local/arm/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/bin/../lib/gcc/arm-linux-gnueabihf/4.9.4/include -I./arch/arm/include -Iarch/arm/include/generated/uapi -Iarch/arm/include/generated  -Iinclude -I./arch/arm/include/uapi -Iarch/arm/include/generated/uapi -I./include/uapi -Iinclude/generated/uapi -include ./include/linux/kconfig.h -D__KERNEL__ -mlittle-endian -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing -fno-common -Werror-implicit-function-declaration -Wno-format-security -std=gnu89 -fno-dwarf2-cfi-asm -fno-ipa-sra -mabi=aapcs-linux -mno-thumb-interwork -mfpu=vfp -funwind-tables -marm -D__LINUX_ARM_ARCH__=7 -march=armv7-a -msoft-float -Uarm -fno-delete-null-pointer-checks -O2 --param=allow-store-data-races=0 -Wframe-larger-than=1024 -fno-stack-protector -Wno-unused-but-set-variable -fomit-frame-pointer -fno-var-tracking-assignments -Wdeclaration-after-statement -Wno-pointer-sign -fno-strict-overflow -fconserve-stack -Werror=implicit-int -Werror=strict-prototypes -Werror=date-time -DCC_HAVE_ASM_GOTO  -DMODULE  -D"KBUILD_STR(s)=#s" -D"KBUILD_BASENAME=KBUILD_STR(chrdevbase)"  -D"KBUILD_MODNAME=KBUILD_STR(chrdevbase)" -c -o /home/auqin/imax6ull_bare_development/linux_drivers/1_chrdevbase/.tmp_chrdevbase.o /home/auqin/imax6ull_bare_development/linux_drivers/1_chrdevbase/chrdevbase.c
+cmd_/home/auqin/imax6ull_bare_development/linux_drivers/4_dtbled/dtbled.mod.o := arm-linux-gnueabihf-gcc -Wp,-MD,/home/auqin/imax6ull_bare_development/linux_drivers/4_dtbled/.dtbled.mod.o.d -nostdinc -isystem /usr/local/arm/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/bin/../lib/gcc/arm-linux-gnueabihf/4.9.4/include -I./arch/arm/include -Iarch/arm/include/generated/uapi -Iarch/arm/include/generated  -Iinclude -I./arch/arm/include/uapi -Iarch/arm/include/generated/uapi -I./include/uapi -Iinclude/generated/uapi -include ./include/linux/kconfig.h -D__KERNEL__ -mlittle-endian -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing -fno-common -Werror-implicit-function-declaration -Wno-format-security -std=gnu89 -fno-dwarf2-cfi-asm -fno-ipa-sra -mabi=aapcs-linux -mno-thumb-interwork -mfpu=vfp -funwind-tables -marm -D__LINUX_ARM_ARCH__=7 -march=armv7-a -msoft-float -Uarm -fno-delete-null-pointer-checks -O2 --param=allow-store-data-races=0 -Wframe-larger-than=1024 -fno-stack-protector -Wno-unused-but-set-variable -fomit-frame-pointer -fno-var-tracking-assignments -Wdeclaration-after-statement -Wno-pointer-sign -fno-strict-overflow -fconserve-stack -Werror=implicit-int -Werror=strict-prototypes -Werror=date-time -DCC_HAVE_ASM_GOTO  -D"KBUILD_STR(s)=#s" -D"KBUILD_BASENAME=KBUILD_STR(dtbled.mod)"  -D"KBUILD_MODNAME=KBUILD_STR(dtbled)" -DMODULE  -c -o /home/auqin/imax6ull_bare_development/linux_drivers/4_dtbled/dtbled.mod.o /home/auqin/imax6ull_bare_development/linux_drivers/4_dtbled/dtbled.mod.c
 
-source_/home/auqin/imax6ull_bare_development/linux_drivers/1_chrdevbase/chrdevbase.o := /home/auqin/imax6ull_bare_development/linux_drivers/1_chrdevbase/chrdevbase.c
+source_/home/auqin/imax6ull_bare_development/linux_drivers/4_dtbled/dtbled.mod.o := /home/auqin/imax6ull_bare_development/linux_drivers/4_dtbled/dtbled.mod.c
 
-deps_/home/auqin/imax6ull_bare_development/linux_drivers/1_chrdevbase/chrdevbase.o := \
+deps_/home/auqin/imax6ull_bare_development/linux_drivers/4_dtbled/dtbled.mod.o := \
+    $(wildcard include/config/module/unload.h) \
   include/linux/module.h \
     $(wildcard include/config/sysfs.h) \
     $(wildcard include/config/modules.h) \
@@ -16,7 +17,6 @@ deps_/home/auqin/imax6ull_bare_development/linux_drivers/1_chrdevbase/chrdevbase
     $(wildcard include/config/event/tracing.h) \
     $(wildcard include/config/ftrace/mcount/record.h) \
     $(wildcard include/config/livepatch.h) \
-    $(wildcard include/config/module/unload.h) \
     $(wildcard include/config/constructors.h) \
     $(wildcard include/config/debug/set/module/ronx.h) \
   include/linux/list.h \
@@ -431,103 +431,9 @@ deps_/home/auqin/imax6ull_bare_development/linux_drivers/1_chrdevbase/chrdevbase
     $(wildcard include/config/have/mod/arch/specific.h) \
     $(wildcard include/config/modules/use/elf/rel.h) \
     $(wildcard include/config/modules/use/elf/rela.h) \
-  include/linux/fs.h \
-    $(wildcard include/config/fs/posix/acl.h) \
-    $(wildcard include/config/security.h) \
-    $(wildcard include/config/ima.h) \
-    $(wildcard include/config/fsnotify.h) \
-    $(wildcard include/config/epoll.h) \
-    $(wildcard include/config/file/locking.h) \
-    $(wildcard include/config/quota.h) \
-    $(wildcard include/config/fs/dax.h) \
-    $(wildcard include/config/block.h) \
-    $(wildcard include/config/migration.h) \
-  include/linux/kdev_t.h \
-  include/uapi/linux/kdev_t.h \
-  include/linux/dcache.h \
-  include/linux/rculist.h \
-  include/linux/rculist_bl.h \
-  include/linux/list_bl.h \
-  include/linux/bit_spinlock.h \
-  include/linux/lockref.h \
-    $(wildcard include/config/arch/use/cmpxchg/lockref.h) \
-  include/linux/path.h \
-  include/linux/list_lru.h \
-    $(wildcard include/config/memcg/kmem.h) \
-  include/linux/shrinker.h \
-  include/linux/radix-tree.h \
-  include/linux/pid.h \
-  include/linux/capability.h \
-  include/uapi/linux/capability.h \
-  include/linux/semaphore.h \
-  include/uapi/linux/fiemap.h \
-  include/linux/migrate_mode.h \
-  include/linux/percpu-rwsem.h \
-  include/linux/blk_types.h \
-    $(wildcard include/config/blk/cgroup.h) \
-    $(wildcard include/config/blk/dev/integrity.h) \
-  include/uapi/linux/fs.h \
-  include/uapi/linux/limits.h \
-  include/uapi/linux/ioctl.h \
-  arch/arm/include/generated/asm/ioctl.h \
-  include/asm-generic/ioctl.h \
-  include/uapi/asm-generic/ioctl.h \
-  include/linux/quota.h \
-    $(wildcard include/config/quota/netlink/interface.h) \
-  include/linux/percpu_counter.h \
-  include/uapi/linux/dqblk_xfs.h \
-  include/linux/dqblk_v1.h \
-  include/linux/dqblk_v2.h \
-  include/linux/dqblk_qtree.h \
-  include/linux/projid.h \
-  include/uapi/linux/quota.h \
-  include/linux/nfs_fs_i.h \
-  include/linux/fcntl.h \
-  include/uapi/linux/fcntl.h \
-  arch/arm/include/uapi/asm/fcntl.h \
-  include/uapi/asm-generic/fcntl.h \
-  include/linux/cdev.h \
-  include/linux/device.h \
-    $(wildcard include/config/debug/devres.h) \
-    $(wildcard include/config/pinctrl.h) \
-    $(wildcard include/config/dma/cma.h) \
-    $(wildcard include/config/of.h) \
-    $(wildcard include/config/devtmpfs.h) \
-    $(wildcard include/config/sysfs/deprecated.h) \
-  include/linux/ioport.h \
-  include/linux/klist.h \
-  include/linux/pinctrl/devinfo.h \
-    $(wildcard include/config/pm.h) \
-  include/linux/pinctrl/consumer.h \
-  include/linux/seq_file.h \
-  include/linux/pinctrl/pinctrl-state.h \
-  include/linux/pm.h \
-    $(wildcard include/config/vt/console/sleep.h) \
-    $(wildcard include/config/pm/clk.h) \
-    $(wildcard include/config/pm/generic/domains.h) \
-  include/linux/ratelimit.h \
-  arch/arm/include/asm/device.h \
-    $(wildcard include/config/dmabounce.h) \
-    $(wildcard include/config/iommu/api.h) \
-    $(wildcard include/config/arm/dma/use/iommu.h) \
-    $(wildcard include/config/arch/omap.h) \
-  include/linux/pm_wakeup.h \
-  include/linux/slab.h \
-    $(wildcard include/config/debug/slab.h) \
-    $(wildcard include/config/kmemcheck.h) \
-    $(wildcard include/config/failslab.h) \
-    $(wildcard include/config/slab.h) \
-    $(wildcard include/config/slub.h) \
-    $(wildcard include/config/slob.h) \
-  include/linux/kmemleak.h \
-    $(wildcard include/config/debug/kmemleak.h) \
-  include/linux/kasan.h \
-    $(wildcard include/config/kasan.h) \
-    $(wildcard include/config/kasan/shadow/offset.h) \
-  include/linux/uaccess.h \
-  arch/arm/include/asm/uaccess.h \
-    $(wildcard include/config/have/efficient/unaligned/access.h) \
+  include/linux/vermagic.h \
+  include/generated/utsrelease.h \
 
-/home/auqin/imax6ull_bare_development/linux_drivers/1_chrdevbase/chrdevbase.o: $(deps_/home/auqin/imax6ull_bare_development/linux_drivers/1_chrdevbase/chrdevbase.o)
+/home/auqin/imax6ull_bare_development/linux_drivers/4_dtbled/dtbled.mod.o: $(deps_/home/auqin/imax6ull_bare_development/linux_drivers/4_dtbled/dtbled.mod.o)
 
-$(deps_/home/auqin/imax6ull_bare_development/linux_drivers/1_chrdevbase/chrdevbase.o):
+$(deps_/home/auqin/imax6ull_bare_development/linux_drivers/4_dtbled/dtbled.mod.o):

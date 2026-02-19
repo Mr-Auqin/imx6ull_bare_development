@@ -1,0 +1,1 @@
+cmd_/home/auqin/imax6ull_bare_development/linux_drivers/2_led/led.ko := arm-linux-gnueabihf-ld -EL -r  -T ./scripts/module-common.lds --build-id  -o /home/auqin/imax6ull_bare_development/linux_drivers/2_led/led.ko /home/auqin/imax6ull_bare_development/linux_drivers/2_led/led.o /home/auqin/imax6ull_bare_development/linux_drivers/2_led/led.mod.o
