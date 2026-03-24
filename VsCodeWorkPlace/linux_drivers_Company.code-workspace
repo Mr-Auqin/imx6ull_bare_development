@@ -1,0 +1,37 @@
+{
+	"folders": [
+		{
+			"path": "../linux_drivers"
+		},
+		{
+			"path": "../../alientek_linux/linux-imx-rel_imx_4.1.15_2.1.1_ga_alientek_v2.4"
+		}
+	],
+	"settings": {
+		"C_Cpp.default.includePath": [
+			"${workspaceFolder}/**",
+			"${workspaceFolder}/../../alientek_linux/linux-imx-rel_imx_4.1.15_2.1.1_ga_alientek_v2.4/include",
+			"${workspaceFolder}/../../alientek_linux/linux-imx-rel_imx_4.1.15_2.1.1_ga_alientek_v2.4/arch/arm/include",
+			"${workspaceFolder}/../../alientek_linux/linux-imx-rel_imx_4.1.15_2.1.1_ga_alientek_v2.4/arch/arm/mach-imx",
+			"${workspaceFolder}/../../alientek_linux/linux-imx-rel_imx_4.1.15_2.1.1_ga_alientek_v2.4/include/uapi",
+			"${workspaceFolder}/../../alientek_linux/linux-imx-rel_imx_4.1.15_2.1.1_ga_alientek_v2.4/include/generated"
+		],
+		"C_Cpp.default.defines": [
+			"__KERNEL__",  // 关键！告诉插件这是内核代码，识别__init宏
+			"MODULE",
+			"__GNUC__",
+			"CONFIG_ARM",
+			"CONFIG_PINCTRL"
+		],
+		"C_Cpp.default.compilerArgs": [
+			"-nostdinc",
+			"-target arm-linux-gnueabihf"
+		],
+		"C_Cpp.default.intelliSenseMode": "linux-gcc-arm",
+		"C_Cpp.errorSquiggles": "disabled",
+		"files.associations": {
+			"*.dts": "dts",
+			"*.dtsi": "dts"
+		}
+	}
+}
